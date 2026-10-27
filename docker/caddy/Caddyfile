@@ -1,0 +1,10 @@
+# Marco para mostrar n8n dentro de la app (pantalla Automatizaciones).
+# n8n envía "X-Frame-Options: SAMEORIGIN", que impide verlo en un iframe de otro puerto.
+# Aquí se cambia por una regla más precisa: solo la app (localhost:3000) puede mostrarlo.
+# n8n sigue exigiendo su inicio de sesión; no se usa N8N_PREVIEW_MODE (salta la autenticación).
+:80 {
+	reverse_proxy n8n:5678 {
+		header_down -X-Frame-Options
+		header_down Content-Security-Policy "frame-ancestors 'self' http://localhost:3000"
+	}
+}

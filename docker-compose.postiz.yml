@@ -1,0 +1,147 @@
+# Postiz: publica en Instagram, Facebook, TikTok, X, YouTube… a la hora del calendario.
+# Basado en github.com/gitroomhq/postiz-docker-compose (jul 2026), con estos cambios:
+#  - versión fija (no "latest"): subir de versión puede exigir migrar Temporal;
+#  - todo solo en 127.0.0.1 y claves desde .env (no las de ejemplo);
+#  - sin Temporal UI / admin-tools / Sentry (no hacen falta para publicar).
+# Lo incluye docker-compose.yml, así que `docker compose up -d` lo enciende con lo demás.
+services:
+  postiz:
+    image: ghcr.io/gitroomhq/postiz-app:v2.25.1
+    restart: unless-stopped
+    environment:
+      MAIN_URL: http://localhost:4007
+      FRONTEND_URL: http://localhost:4007
+      NEXT_PUBLIC_BACKEND_URL: http://localhost:4007/api
+      JWT_SECRET: ${POSTIZ_JWT_SECRET}
+      DATABASE_URL: postgresql://postiz:${POSTIZ_DB_PASSWORD}@postiz-postgres:5432/postiz
+      REDIS_URL: redis://postiz-redis:6379
+      BACKEND_INTERNAL_URL: http://localhost:3000
+      TEMPORAL_ADDRESS: temporal:7233
+      IS_GENERAL: "true"
+      # Tras crear tu usuario en http://localhost:4007, pon POSTIZ_SIN_REGISTRO=true en .env.
+      DISABLE_REGISTRATION: ${POSTIZ_SIN_REGISTRO:-false}
+      RUN_CRON: "true"
+      # Instagram y TikTok descargan los medios desde una URL pública (https): para ellas,
+      # POSTIZ_STORAGE=cloudflare y los datos de un bucket R2 en .env. "local" sirve para X/Facebook texto.
+      STORAGE_PROVIDER: ${POSTIZ_STORAGE:-local}
+      UPLOAD_DIRECTORY: /uploads
+      NEXT_PUBLIC_UPLOAD_DIRECTORY: /uploads
+      CLOUDFLARE_ACCOUNT_ID: ${POSTIZ_R2_ACCOUNT_ID:-}
+      CLOUDFLARE_ACCESS_KEY: ${POSTIZ_R2_ACCESS_KEY:-}
+      CLOUDFLARE_SECRET_ACCESS_KEY: ${POSTIZ_R2_SECRET_KEY:-}
+      CLOUDFLARE_BUCKETNAME: ${POSTIZ_R2_BUCKET:-}
+      CLOUDFLARE_BUCKET_URL: ${POSTIZ_R2_PUBLIC_URL:-}
+      CLOUDFLARE_REGION: auto
+      # Apps de desarrollador de cada red (se crean en cada plataforma; ver README).
+      FACEBOOK_APP_ID: ${POSTIZ_FACEBOOK_APP_ID:-}
+      FACEBOOK_APP_SECRET: ${POSTIZ_FACEBOOK_APP_SECRET:-}
+      TIKTOK_CLIENT_ID: ${POSTIZ_TIKTOK_CLIENT_ID:-}
+      TIKTOK_CLIENT_SECRET: ${POSTIZ_TIKTOK_CLIENT_SECRET:-}
+      X_API_KEY: ${POSTIZ_X_API_KEY:-}
+      X_API_SECRET: ${POSTIZ_X_API_SECRET:-}
+      YOUTUBE_CLIENT_ID: ${POSTIZ_YOUTUBE_CLIENT_ID:-}
+      YOUTUBE_CLIENT_SECRET: ${POSTIZ_YOUTUBE_CLIENT_SECRET:-}
+      THREADS_APP_ID: ${POSTIZ_THREADS_APP_ID:-}
+      THREADS_APP_SECRET: ${POSTIZ_THREADS_APP_SECRET:-}
+      API_LIMIT: 30
+      NX_ADD_PLUGINS: "false"
+    volumes:
+      - postiz-config:/config/
+      - postiz-uploads:/uploads/
+    ports: ["127.0.0.1:4007:5000"]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on:
+      postiz-postgres: { condition: service_healthy }
+      postiz-redis: { condition: service_healthy }
+      temporal: { condition: service_healthy }
+
+  postiz-postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postiz
+      POSTGRES_PASSWORD: ${POSTIZ_DB_PASSWORD}
+      POSTGRES_DB: postiz
+    volumes: [postiz-postgres:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postiz -d postiz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postiz-redis:
+    image: redis:7.2
+    restart: unless-stopped
+    volumes: [postiz-redis:/data]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Temporal: el motor que ejecuta las publicaciones programadas de Postiz.
+  temporal-elasticsearch:
+    image: elasticsearch:7.17.27
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+      - xpack.security.enabled=false
+      - cluster.routing.allocation.disk.threshold_enabled=true
+      - cluster.routing.allocation.disk.watermark.low=512mb
+      - cluster.routing.allocation.disk.watermark.high=256mb
+      - cluster.routing.allocation.disk.watermark.flood_stage=128mb
+    volumes: [temporal-elasticsearch:/usr/share/elasticsearch/data]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS \"http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s\" || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  temporal-postgresql:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: ${TEMPORAL_DB_PASSWORD}
+    volumes: [temporal-postgres:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U temporal"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  temporal:
+    image: temporalio/auto-setup:1.28.1
+    restart: unless-stopped
+    depends_on:
+      temporal-postgresql: { condition: service_healthy }
+      temporal-elasticsearch: { condition: service_healthy }
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=${TEMPORAL_DB_PASSWORD}
+      - POSTGRES_SEEDS=temporal-postgresql
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
+      - ENABLE_ES=true
+      - ES_SEEDS=temporal-elasticsearch
+      - ES_VERSION=v7
+      - TEMPORAL_NAMESPACE=default
+    volumes:
+      - ./docker/temporal:/etc/temporal/config/dynamicconfig
+    healthcheck:
+      test: ["CMD", "temporal", "operator", "cluster", "health", "--address", "temporal:7233"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  postiz-config:
+  postiz-uploads:
+  postiz-postgres:
+  postiz-redis:
+  temporal-elasticsearch:
+  temporal-postgres:

@@ -1,0 +1,54 @@
+# Postgres (app + n8n) y n8n, solo accesibles desde este PC (127.0.0.1).
+# La app Next.js corre en el host (npm run dev / start) en el puerto 3000.
+# Postiz (publicación en redes) vive en su propio archivo y se enciende junto con esto.
+include:
+  - docker-compose.postiz.yml
+
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: radar
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: radar
+    ports: ["127.0.0.1:5433:5432"]
+    volumes:
+      - db:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    depends_on: [db]
+    ports: ["127.0.0.1:5678:5678"]
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: db
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: radar
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      GENERIC_TIMEZONE: America/Bogota
+      TZ: America/Bogota
+      N8N_SECURE_COOKIE: "false"
+      # URL de la app para los flujos: {{$env.APP_URL}}. La clave va en una credencial Header Auth.
+      APP_URL: ${APP_URL:-http://host.docker.internal:3000}
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    volumes:
+      - n8n:/home/node/.n8n
+      - ./n8n:/respaldo
+
+  # Muestra n8n dentro de la app (http://localhost:5679); ver docker/caddy/Caddyfile.
+  n8n-marco:
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    depends_on: [n8n]
+    ports: ["127.0.0.1:5679:80"]
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+
+volumes:
+  db:
+  n8n:

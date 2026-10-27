@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+/* Paleta oscura al estilo Docker Desktop: barra superior azul, lateral casi negra. */
+:root {
+  color-scheme: dark;
+  --barra: #0a2463;
+  --lateral: #121418;
+  --fondo: #17191e;
+  --superficie: #1f2229;
+  --borde: #2d323b;
+  --texto: #e8eaed;
+  --suave: #9aa2ad;
+  --marca: #3b8bf6;
+  --marca-texto: #ffffff;
+  --ok: #3ecf8e;
+  --ok-fondo: #12291e;
+  --alerta: #f2777e;
+  --alerta-fondo: #2e1517;
+  --aviso: #f0c35a;
+  --aviso-fondo: #2b2310;
+}
+
+@theme inline {
+  --color-barra: var(--barra);
+  --color-lateral: var(--lateral);
+  --color-fondo: var(--fondo);
+  --color-superficie: var(--superficie);
+  --color-borde: var(--borde);
+  --color-texto: var(--texto);
+  --color-suave: var(--suave);
+  --color-marca: var(--marca);
+  --color-marca-texto: var(--marca-texto);
+  --color-ok: var(--ok);
+  --color-ok-fondo: var(--ok-fondo);
+  --color-alerta: var(--alerta);
+  --color-alerta-fondo: var(--alerta-fondo);
+  --color-aviso: var(--aviso);
+  --color-aviso-fondo: var(--aviso-fondo);
+  --font-sans: var(--font-geist-sans);
+}
+
+body {
+  background: var(--fondo);
+  color: var(--texto);
+}
+
+@layer components {
+  .tarjeta {
+    @apply rounded-xl border border-borde bg-superficie p-5;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-borde bg-superficie px-3.5 py-2 text-sm font-medium transition hover:brightness-95 disabled:opacity-50 cursor-pointer;
+  }
+  .btn-primario {
+    @apply border-transparent bg-marca text-marca-texto;
+  }
+  .btn-ok {
+    @apply border-transparent bg-ok text-white;
+  }
+  .campo {
+    @apply w-full rounded-lg border border-borde bg-superficie px-3 py-2 text-sm outline-none focus:border-marca focus:ring-2 focus:ring-marca/20;
+  }
+  .etiqueta {
+    @apply mb-1 block text-sm font-medium;
+  }
+  .ayuda {
+    @apply mt-1 text-xs text-suave;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+  }
+}
