@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { publicacionHabilitada, revisar } from "../lib/cumplimiento";
+import { enCampana, publicacionHabilitada, revisar } from "../lib/cumplimiento";
 import { cifrar, descifrar, hashClave, verificarClave } from "../lib/cifrado";
 import { crearToken, leerToken } from "../lib/sesion";
 import { nombresMunicipio, parsearFeed } from "../lib/fuentes";
@@ -34,6 +34,15 @@ for (const pedagogia of [
 assert.ok(revisar("Soy candidato al Concejo").length > 0);
 assert.ok(revisar("Concejal 2028-2031").length > 0);
 assert.ok(revisar("Alcaldesa 2028").length > 0);
+// Modo campaña: ya se puede pedir el voto y presentarse; lo demás sigue prohibido.
+assert.deepEqual(revisar("Soy candidato: vota por mí, marca el número 3 en el tarjetón", [], true), []);
+assert.ok(revisar("Soy candidato: vota por mí").length > 0); // en pre-campaña sí alerta
+assert.ok(revisar("Gran sorteo para quienes me apoyen", [], true).length > 0);
+assert.ok(revisar("Con el escudo de la Alcaldía", [], true).length > 0);
+assert.ok(revisar("El predial subió 12%", [], true).includes("Dato numérico sin fuente"));
+assert.equal(enCampana(null, new Date()), false);
+assert.equal(enCampana("2027-07-29", new Date("2027-07-28T23:59:00-05:00")), false);
+assert.equal(enCampana("2027-07-29", new Date("2027-07-29T00:00:00-05:00")), true);
 assert.ok(revisar("El predial subió 12%").includes("Dato numérico sin fuente"));
 assert.deepEqual(revisar("El predial subió 12%", ["https://www.datos.gov.co/x"]), []);
 

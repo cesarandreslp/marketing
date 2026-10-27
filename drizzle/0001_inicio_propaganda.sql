@@ -1,0 +1,1 @@
+ALTER TABLE "cuentas" ADD COLUMN "inicio_propaganda" date;

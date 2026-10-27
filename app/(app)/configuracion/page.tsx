@@ -237,6 +237,13 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
                 ayuda="Fecha del acto que acepta tu renuncia. Antes de esta fecha no se publica nada. Si nunca fuiste servidor público, pon la fecha de hoy."
               />
             </div>
+            <Campo
+              nombre="inicioPropaganda"
+              etiqueta="Inicio de la propaganda electoral"
+              tipo="date"
+              valor={c.inicioPropaganda}
+              ayuda="Desde esta fecha el sistema redacta en modo campaña: ya puedes presentarte como candidato y pedir el voto. Confírmala en el calendario de la Registraduría. Vacío = pre-campaña."
+            />
             <Campo nombre="presupuestoMensualCop" etiqueta="Presupuesto mensual (COP)" tipo="number" min={0} step={1000} valor={a.presupuestoMensualCop} />
           </Seccion>
         </Bloque>

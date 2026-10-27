@@ -7,7 +7,7 @@
  */
 import { and, desc, eq, gte, isNotNull, sql } from "drizzle-orm";
 import { generarJSON, SaturacionError } from "./ai";
-import { revisar } from "./cumplimiento";
+import { enCampana, revisar } from "./cumplimiento";
 import { cuentas, db, items, piezas } from "./db";
 import { radar } from "./radar";
 import { enviar } from "./telegram";
@@ -32,10 +32,14 @@ const PILARES = {
   coyuntura: "10% · reacción a la coyuntura, siempre con propuesta y no solo crítica",
 };
 
-const REGLAS =
-  "Pre-campaña en Colombia (Ley 1475 de 2011): prohibido pedir el voto o apoyo electoral, aun de forma implícita " +
-  "(«acompáñame en 2027», «ayúdame a llegar»); prohibido presentarse como candidato o hacer promesas de gobierno " +
-  "(«cuando sea concejal haré…»). Prohibido acusar o atacar a personas con nombre propio, nombrar a particulares, " +
+const REGLAS = (campana: boolean) =>
+  (campana
+    ? "Campaña en Colombia, dentro de la ventana legal de propaganda (Ley 1475 de 2011): puede presentarse como candidato, " +
+      "pedir el voto y mencionar el tarjetón y su número. Prohibido ofrecer sorteos, regalos o beneficios a cambio de apoyo. "
+    : "Pre-campaña en Colombia (Ley 1475 de 2011): prohibido pedir el voto o apoyo electoral, aun de forma implícita " +
+      "(«acompáñame en 2027», «ayúdame a llegar»); prohibido presentarse como candidato o hacer promesas de gobierno " +
+      "(«cuando sea concejal haré…»). Sí se permite la pedagogía electoral (cuidar el voto, testigos electorales). ") +
+  "Prohibido acusar o atacar a personas con nombre propio, nombrar a particulares, " +
   "mostrar menores identificables, usar símbolos oficiales de la Alcaldía, dar cifras sin fuente o afirmar hechos no " +
   "verificables. Tono: cercano, propositivo, respetuoso, en español de Colombia.";
 
@@ -71,7 +75,8 @@ export function redesActivas(c: Cuenta): Set<Red> {
 
 // ---------- contexto ----------
 
-async function contexto(c: Cuenta) {
+/** La etapa (pre-campaña o campaña) se fija por el lunes de la semana: una semana a caballo queda en pre-campaña. */
+async function contexto(c: Cuenta, semana: string) {
   const [temas, menciones, rechazos, anteriores] = await Promise.all([
     radar(c.id, 8),
     db
@@ -97,7 +102,8 @@ async function contexto(c: Cuenta) {
     (c.ajustes.temasPropios ? `\nSus temas propios: ${c.ajustes.temasPropios.replace(/\n/g, "; ")}.` : "") +
     (c.ajustes.barrios ? `\nBarrios/zonas prioritarias: ${c.ajustes.barrios.replace(/\n/g, ", ")}.` : "");
   const motivos = rechazos.map((r) => r.motivo).filter((m) => m && m !== "Sin motivo");
-  return { temas, menciones, motivos, anteriores: anteriores.map((a) => a.concepto!), perfil };
+  const campana = enCampana(c.inicioPropaganda, fechaHora(semana, 1, "00:00"));
+  return { temas, menciones, motivos, anteriores: anteriores.map((a) => a.concepto!), perfil, campana, reglas: REGLAS(campana) };
 }
 
 type Ctx = Awaited<ReturnType<typeof contexto>>;
@@ -120,7 +126,7 @@ async function planear(c: Cuenta, ctx: Ctx, redes: Set<Red>): Promise<Concepto[]
     .filter((f) => FORMATOS[f].redes.some((r) => redes.has(r)))
     .map((f) => `${FORMATOS[f].cantidad} ${f}`);
   const r = await generarJSON<{ conceptos?: Concepto[] }>(c.id, "textos", {
-    sistema: `Eres estratega de comunicación política local. ${REGLAS}`,
+    sistema: `Eres estratega de comunicación política local. ${ctx.reglas}`,
     prompt:
       `Perfil: ${ctx.perfil}\n\n` +
       `Planea la próxima semana: exactamente ${cantidades.join(", ")}.\n` +
@@ -161,7 +167,7 @@ async function redactar(c: Cuenta, ctx: Ctx, k: Concepto, redes: Red[], corregir
         : `"guion" y "promptMedia" vacíos.`;
   const respaldo = ctx.menciones.filter((m) => k.menciones?.includes(m.id));
   return generarJSON<Redaccion>(c.id, "textos", {
-    sistema: `Eres el redactor de ${c.nombrePublico}. ${REGLAS}`,
+    sistema: `Eres el redactor de ${c.nombrePublico}. ${ctx.reglas}`,
     prompt:
       `Perfil: ${ctx.perfil}\n\nConcepto: ${k.concepto}\nPilar: ${k.pilar}\nIdea: ${k.idea}\n` +
       (respaldo.length ? `Lo que dice la gente:\n${respaldo.map((m) => `- ${m.resumen}`).join("\n")}\n` : "") +
@@ -177,7 +183,7 @@ async function redactar(c: Cuenta, ctx: Ctx, k: Concepto, redes: Red[], corregir
 /** Los posts de X son cortos: todos en una sola llamada (ahorra cuota de los planes gratis). */
 async function redactarPostsX(c: Cuenta, ctx: Ctx, ks: Concepto[]): Promise<string[]> {
   const r = await generarJSON<{ posts?: string[] }>(c.id, "textos", {
-    sistema: `Eres el redactor de ${c.nombrePublico}. ${REGLAS}`,
+    sistema: `Eres el redactor de ${c.nombrePublico}. ${ctx.reglas}`,
     prompt:
       `Perfil: ${ctx.perfil}\n\nEscribe un post de X para cada idea, en el mismo orden. ${GUIA_RED.x} ` +
       `Primera persona como ${c.nombrePublico}; sin cifras que no sean verificables.\n\n` +
@@ -198,13 +204,16 @@ type AlertaIA = { id: string; red: string; motivo: string };
  * Segunda lectura con IA de TODA la semana en una sola llamada. Devuelve las
  * alertas por bloque; si la IA falla, null (no bloquea: queda "Sin revisión IA").
  */
-async function revisarConIA(c: Cuenta, bloques: Bloque[]): Promise<Map<string, AlertaIA[]> | null> {
+async function revisarConIA(c: Cuenta, ctx: Ctx, bloques: Bloque[]): Promise<Map<string, AlertaIA[]> | null> {
   try {
     const r = await generarJSON<{ alertas?: AlertaIA[] }>(c.id, "textos", {
-      sistema: `Eres abogado electoral y editor. Revisas contenido antes de publicarlo. ${REGLAS}`,
+      sistema: `Eres abogado electoral y editor. Revisas contenido antes de publicarlo. ${ctx.reglas}`,
       prompt:
-        `Revisa este contenido. Reporta SOLO problemas reales (no estilo): pedir voto o apoyo electoral, presentarse como ` +
-        `candidato o prometer gobierno, ataques o acusaciones a personas con nombre, datos de particulares o menores, ` +
+        `Revisa este contenido. Reporta SOLO problemas reales (no estilo): ` +
+        (ctx.campana
+          ? `sorteos, regalos o beneficios a cambio de apoyo, `
+          : `pedir voto o apoyo electoral, presentarse como candidato o prometer gobierno, `) +
+        `ataques o acusaciones a personas con nombre, datos de particulares o menores, ` +
         `cifras sin fuente, símbolos oficiales, desinformación o discurso de odio. Si todo está bien, devuelve una lista vacía.\n\n` +
         bloques
           .map((b) =>
@@ -224,9 +233,10 @@ async function revisarConIA(c: Cuenta, bloques: Bloque[]): Promise<Map<string, A
   }
 }
 
-function alertasDe(red: Red, copy: string, guion: string | undefined, fuentes: string[], ia: AlertaIA[] | undefined) {
+/** El filtro por regex usa la fecha de publicación de cada pieza. */
+function alertasDe(c: Cuenta, fecha: Date, red: Red, copy: string, guion: string | undefined, fuentes: string[], ia: AlertaIA[] | undefined) {
   return [
-    ...revisar(`${copy}\n${guion ?? ""}`, fuentes),
+    ...revisar(`${copy}\n${guion ?? ""}`, fuentes, enCampana(c.inicioPropaganda, fecha)),
     ...(ia ?? []).filter((a) => a.red === red || a.red === "todas").map((a) => `IA: ${a.motivo}`),
   ];
 }
@@ -240,7 +250,7 @@ function alertasDe(red: Red, copy: string, guion: string | undefined, fuentes: s
  */
 export async function generarSemana(c: Cuenta, semana = proximoLunes()) {
   const redes = redesActivas(c);
-  const ctx = await contexto(c);
+  const ctx = await contexto(c, semana);
   const conceptos = await planear(c, ctx, redes);
   if (!conceptos.length) throw new Error("La IA no devolvió un plan. Intenta de nuevo.");
 
@@ -271,7 +281,7 @@ export async function generarSemana(c: Cuenta, semana = proximoLunes()) {
   }
   if (!hechos.length) throw new Error(detenido ?? "La IA no pudo redactar ninguna pieza. Intenta de nuevo.");
 
-  const ia = await revisarConIA(c, hechos.map((h, i) => ({ id: String(i + 1), guion: h.guion, copys: h.copys })));
+  const ia = await revisarConIA(c, ctx, hechos.map((h, i) => ({ id: String(i + 1), guion: h.guion, copys: h.copys })));
 
   // Solo ahora se reemplazan los borradores viejos. Si la IA se cortó a mitad de
   // camino y ya había una semana armada, se conserva la anterior completa.
@@ -284,7 +294,9 @@ export async function generarSemana(c: Cuenta, semana = proximoLunes()) {
     const fuentes = ctx.menciones.filter((m) => h.k.menciones?.includes(m.id) && m.url).map((m) => m.url!);
     return h.redes
       .filter((r) => h.copys[r]?.trim())
-      .map((r) => ({
+      .map((r) => {
+        const fechaProgramada = fechaHora(semana, h.k.dia, horaValida(h.k.hora, FORMATOS[h.k.formato].hora));
+        return {
         cuentaId: c.id,
         semana,
         red: r,
@@ -296,10 +308,11 @@ export async function generarSemana(c: Cuenta, semana = proximoLunes()) {
         guion: h.guion?.trim() || null,
         promptMedia: h.promptMedia?.trim() || null,
         fuentes,
-        alertas: alertasDe(r, h.copys[r]!, h.guion, fuentes, ia?.get(String(i + 1))),
+        alertas: alertasDe(c, fechaProgramada, r, h.copys[r]!, h.guion, fuentes, ia?.get(String(i + 1))),
         revisadaIA: ia !== null,
-        fechaProgramada: fechaHora(semana, h.k.dia, horaValida(h.k.hora, FORMATOS[h.k.formato].hora)),
-      }));
+        fechaProgramada,
+      };
+      });
   });
   if (filas.length) await db.insert(piezas).values(filas);
 
@@ -323,13 +336,13 @@ export async function rehacerPieza(c: Cuenta, piezaId: number, motivo: string) {
   await db.update(piezas).set({ estado: "rechazada", motivoRechazo: motivo || "Sin motivo" }).where(eq(piezas.id, p.id));
   if (!motivo) return null; // sin comentario no hay a qué atender: solo se descarta
 
-  const ctx = await contexto(c);
+  const ctx = await contexto(c, p.semana);
   const red = p.red as Red;
   const k: Concepto = { concepto: p.concepto ?? "", formato: p.formato as Formato, pilar: (p.pilar ?? "escucha") as Concepto["pilar"], dia: 1, idea: p.concepto ?? "" };
   const r = await redactar(c, ctx, k, [red], { previo: `${p.guion ? `GUION:\n${p.guion}\n\n` : ""}COPY:\n${p.copy}`, motivo });
   const copy = r.copys?.[red]?.trim();
   if (!copy) throw new Error("La IA no devolvió una versión nueva.");
-  const ia = await revisarConIA(c, [{ id: "1", guion: r.guion, copys: { [red]: copy } }]);
+  const ia = await revisarConIA(c, ctx, [{ id: "1", guion: r.guion, copys: { [red]: copy } }]);
   const [nueva] = await db
     .insert(piezas)
     .values({
@@ -339,7 +352,7 @@ export async function rehacerPieza(c: Cuenta, piezaId: number, motivo: string) {
       copy,
       guion: r.guion?.trim() || p.guion,
       promptMedia: r.promptMedia?.trim() || p.promptMedia,
-      alertas: alertasDe(red, copy, r.guion, p.fuentes, ia?.get("1")),
+      alertas: alertasDe(c, p.fechaProgramada, red, copy, r.guion, p.fuentes, ia?.get("1")),
       revisadaIA: ia !== null,
       estado: "borrador",
       motivoRechazo: null,
@@ -353,8 +366,9 @@ export async function rehacerPieza(c: Cuenta, piezaId: number, motivo: string) {
 export async function editarPieza(cuentaId: number, piezaId: number, copy: string) {
   const [p] = await db.select().from(piezas).where(and(eq(piezas.id, piezaId), eq(piezas.cuentaId, cuentaId)));
   if (!p || p.estado !== "borrador") throw new Error("Solo se pueden editar piezas en borrador.");
+  const [c] = await db.select({ inicioPropaganda: cuentas.inicioPropaganda }).from(cuentas).where(eq(cuentas.id, cuentaId));
   await db
     .update(piezas)
-    .set({ copy, alertas: revisar(`${copy}\n${p.guion ?? ""}`, p.fuentes), revisadaIA: true })
+    .set({ copy, alertas: revisar(`${copy}\n${p.guion ?? ""}`, p.fuentes, enCampana(c.inicioPropaganda, p.fechaProgramada)), revisadaIA: true })
     .where(eq(piezas.id, p.id));
 }

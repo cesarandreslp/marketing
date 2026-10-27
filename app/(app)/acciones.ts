@@ -2,7 +2,7 @@
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { cuentas, db, piezas } from "@/lib/db";
-import { revisar } from "@/lib/cumplimiento";
+import { enCampana, revisar } from "@/lib/cumplimiento";
 import { editarPieza, generarSemana, rehacerPieza } from "@/lib/estratega";
 import { marcarPublicada } from "@/lib/publicador";
 import type { Resultado } from "@/lib/pruebas";
@@ -18,7 +18,7 @@ const fallo = (e: unknown): Resultado => ({ ok: false, msg: (e as Error).message
 
 /** Aprueba los borradores sin alertas. Las piezas con alertas esperan a que las edites o rehagas. */
 export async function aprobarSemana(_: Resultado | null, form: FormData): Promise<Resultado> {
-  const { cuentaId } = await requerirSesion();
+  const { id: cuentaId, inicioPropaganda } = await cuenta();
   const borradores = await db
     .select()
     .from(piezas)
@@ -26,7 +26,7 @@ export async function aprobarSemana(_: Resultado | null, form: FormData): Promis
   let aprobadas = 0;
   for (const p of borradores) {
     // Doble control: las alertas guardadas y el filtro por regex de nuevo.
-    const alertas = p.alertas.length ? p.alertas : revisar(`${p.copy}\n${p.guion ?? ""}`, p.fuentes);
+    const alertas = p.alertas.length ? p.alertas : revisar(`${p.copy}\n${p.guion ?? ""}`, p.fuentes, enCampana(inicioPropaganda, p.fechaProgramada));
     if (alertas.length) {
       await db.update(piezas).set({ alertas }).where(eq(piezas.id, p.id));
       continue;

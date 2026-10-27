@@ -46,6 +46,8 @@ export const cuentas = pgTable("cuentas", {
   fechaEleccion: date(),
   // Antes de esta fecha no se entrega nada para publicar (Const. art. 127).
   fechaRetiroFirme: date(),
+  // Desde esta fecha rige la propaganda electoral: ya se puede pedir el voto (Ley 1475 art. 35).
+  inicioPropaganda: date(),
   ajustes: jsonb().$type<Ajustes>().default({}).notNull(),
   claveN8nHash: text("clave_n8n_hash").unique(), // sha256 de la clave que usa n8n para esta cuenta
   creadoEn: timestamp({ withTimezone: true }).defaultNow().notNull(),

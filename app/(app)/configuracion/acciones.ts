@@ -19,6 +19,7 @@ const Perfil = z.object({
   cargo: z.enum(CARGOS),
   fechaEleccion: opcional,
   fechaRetiroFirme: opcional,
+  inicioPropaganda: opcional,
 });
 
 const AJUSTES = [
