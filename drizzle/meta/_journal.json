@@ -15,6 +15,13 @@
       "when": 1793111847430,
       "tag": "0001_inicio_propaganda",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793111957470,
+      "tag": "0002_nunca_servidor_publico",
+      "breakpoints": true
     }
   ]
 }

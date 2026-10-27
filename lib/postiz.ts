@@ -114,7 +114,7 @@ type EstadoPostiz = { id: string; state?: string; error?: string | null; release
  *  2. revisa lo ya programado: publicado → la marca; error → la devuelve a Telegram.
  */
 export async function sincronizarPostiz(c: Cuenta) {
-  if (!publicacionHabilitada(c.fechaRetiroFirme)) return { postiz: "deshabilitado" };
+  if (!publicacionHabilitada(c)) return { postiz: "deshabilitado" };
   const { postiz_api_key: clave } = await leerSecretos(c.id);
   if (!clave) return { postiz: "sin clave" };
   const canales = mapaCanales(await listarCanales(clave));

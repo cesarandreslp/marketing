@@ -234,9 +234,13 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
                 etiqueta="Retiro del cargo público en firme"
                 tipo="date"
                 valor={c.fechaRetiroFirme}
-                ayuda="Fecha del acto que acepta tu renuncia. Antes de esta fecha no se publica nada. Si nunca fuiste servidor público, pon la fecha de hoy."
+                ayuda="Fecha del acto que acepta tu renuncia. Antes de esta fecha no se publica nada."
               />
             </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" name="nuncaServidorPublico" defaultChecked={c.nuncaServidorPublico} />
+              No soy ni he sido servidor público (no se exige la fecha de retiro)
+            </label>
             <Campo
               nombre="inicioPropaganda"
               etiqueta="Inicio de la propaganda electoral"

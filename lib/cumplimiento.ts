@@ -41,6 +41,9 @@ export function revisar(copy: string, fuentes: string[] = [], campana = false): 
 }
 
 /** Antes de que el retiro del cargo quede en firme no se publica nada político (Const. art. 127). */
-export function publicacionHabilitada(fechaRetiroFirme: string | null, hoy = new Date()): boolean {
-  return !!fechaRetiroFirme && hoy >= new Date(`${fechaRetiroFirme}T00:00:00-05:00`);
+export function publicacionHabilitada(
+  { fechaRetiroFirme, nuncaServidorPublico }: { fechaRetiroFirme: string | null; nuncaServidorPublico: boolean },
+  hoy = new Date(),
+): boolean {
+  return nuncaServidorPublico || (!!fechaRetiroFirme && hoy >= new Date(`${fechaRetiroFirme}T00:00:00-05:00`));
 }

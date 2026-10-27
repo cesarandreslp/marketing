@@ -60,7 +60,7 @@ async function avisar(c: Cuenta, token: string, p: Pieza) {
 
 /** n8n lo llama cada 15 min. Avisa lo aprobado cuya hora ya llegó (incluye lo atrasado si el PC estuvo apagado). */
 export async function avisarPendientes(c: Cuenta) {
-  if (!publicacionHabilitada(c.fechaRetiroFirme)) return { habilitado: false, avisadas: 0 };
+  if (!publicacionHabilitada(c)) return { habilitado: false, avisadas: 0 };
   const { telegram_bot_token: token } = await leerSecretos(c.id);
   if (!token || !c.ajustes.telegramChatId) return { habilitado: true, avisadas: 0, motivo: "Telegram no está conectado" };
 

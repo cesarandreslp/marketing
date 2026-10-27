@@ -10,7 +10,7 @@ import { cuentaDeN8n } from "@/lib/n8n";
 export async function GET(req: Request) {
   const { cuenta, error } = await cuentaDeN8n(req);
   if (error) return error;
-  if (!publicacionHabilitada(cuenta.fechaRetiroFirme)) return Response.json({ habilitado: false, piezas: [] });
+  if (!publicacionHabilitada(cuenta)) return Response.json({ habilitado: false, piezas: [] });
   const lista = await db
     .select()
     .from(piezas)

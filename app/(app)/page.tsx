@@ -141,7 +141,11 @@ export default async function Bandeja() {
   const hayIA = ["zai_api_key", "mistral_api_key", "gemini_api_key"].some((k) => secretos.has(k));
 
   const pasos = [
-    { hecho: !!cuenta.fechaRetiroFirme, texto: "Indica la fecha en que tu retiro del cargo quedó en firme", ancla: "perfil" },
+    {
+      hecho: !!cuenta.fechaRetiroFirme || cuenta.nuncaServidorPublico,
+      texto: "Indica la fecha en que tu retiro del cargo quedó en firme, o marca que nunca fuiste servidor público",
+      ancla: "perfil",
+    },
     { hecho: hayIA, texto: "Conecta al menos un modelo de IA", ancla: "ia" },
     { hecho: secretos.has("telegram_bot_token") && !!cuenta.ajustes.telegramChatId, texto: "Conecta Telegram para tu resumen diario", ancla: "avisos" },
     {
@@ -181,7 +185,7 @@ export default async function Bandeja() {
         </section>
       )}
 
-      {!publicacionHabilitada(cuenta.fechaRetiroFirme) && (
+      {!publicacionHabilitada(cuenta) && (
         <p className="rounded-xl bg-aviso-fondo p-4 text-sm text-aviso">
           <strong>Publicación en pausa.</strong> Puedes preparar y aprobar contenido, pero nada se publicará hasta la fecha en
           que tu retiro del cargo quede en firme. <Link href="/configuracion#perfil" className="underline">Configurar fecha</Link>

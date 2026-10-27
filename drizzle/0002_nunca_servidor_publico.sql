@@ -1,0 +1,1 @@
+ALTER TABLE "cuentas" ADD COLUMN "nunca_servidor_publico" boolean DEFAULT false NOT NULL;

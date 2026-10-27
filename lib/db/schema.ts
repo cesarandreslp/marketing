@@ -46,6 +46,7 @@ export const cuentas = pgTable("cuentas", {
   fechaEleccion: date(),
   // Antes de esta fecha no se entrega nada para publicar (Const. art. 127).
   fechaRetiroFirme: date(),
+  nuncaServidorPublico: boolean().default(false).notNull(), // marcado: no se exige fechaRetiroFirme
   // Desde esta fecha rige la propaganda electoral: ya se puede pedir el voto (Ley 1475 art. 35).
   inicioPropaganda: date(),
   ajustes: jsonb().$type<Ajustes>().default({}).notNull(),

@@ -20,6 +20,8 @@ const Perfil = z.object({
   fechaEleccion: opcional,
   fechaRetiroFirme: opcional,
   inicioPropaganda: opcional,
+  // Casilla: el navegador no la envía si está desmarcada.
+  nuncaServidorPublico: z.string().optional().transform((v) => v === "on"),
 });
 
 const AJUSTES = [

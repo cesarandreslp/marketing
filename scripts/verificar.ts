@@ -46,9 +46,11 @@ assert.equal(enCampana("2027-07-29", new Date("2027-07-29T00:00:00-05:00")), tru
 assert.ok(revisar("El predial subió 12%").includes("Dato numérico sin fuente"));
 assert.deepEqual(revisar("El predial subió 12%", ["https://www.datos.gov.co/x"]), []);
 
-assert.equal(publicacionHabilitada(null), false);
-assert.equal(publicacionHabilitada("2026-10-20", new Date("2026-10-19T12:00:00-05:00")), false);
-assert.equal(publicacionHabilitada("2026-10-20", new Date("2026-10-20T00:00:00-05:00")), true);
+const retiro = (fechaRetiroFirme: string | null, nuncaServidorPublico = false) => ({ fechaRetiroFirme, nuncaServidorPublico });
+assert.equal(publicacionHabilitada(retiro(null)), false);
+assert.equal(publicacionHabilitada(retiro(null, true)), true); // nunca fue servidor público: no se exige fecha
+assert.equal(publicacionHabilitada(retiro("2026-10-20"), new Date("2026-10-19T12:00:00-05:00")), false);
+assert.equal(publicacionHabilitada(retiro("2026-10-20"), new Date("2026-10-20T00:00:00-05:00")), true);
 
 // Cifrado de secretos y contraseñas
 process.env.APP_MASTER_KEY = "11".repeat(32);
