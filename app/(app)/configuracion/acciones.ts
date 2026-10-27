@@ -3,7 +3,7 @@ import { randomBytes } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { Ajustes, CARGOS, cuentas, db, usuarios } from "@/lib/db";
+import { Ajustes, CARGOS, cuentas, db, EQUIPOS, usuarios } from "@/lib/db";
 import { hashClave, sha256, verificarClave } from "@/lib/cifrado";
 import { borrarSecreto, esClaveSecreto, guardarSecreto } from "@/lib/cuenta";
 import { instalarFlujos } from "@/lib/n8n-flujos";
@@ -25,7 +25,7 @@ const Perfil = z.object({
 });
 
 const AJUSTES = [
-  "partido", "temasPropios", "barrios", "fuentesRss", "presupuestoMensualCop",
+  "partido", "temasPropios", "barrios", "fuentesRss", "presupuestoMensualCop", "equipo",
   "facebookPagina", "instagramUsuario", "youtubeCanal", "tiktokUsuario", "xUsuario", "telegramChatId",
 ] as const satisfies readonly (keyof Ajustes)[];
 
@@ -52,6 +52,7 @@ export async function guardar(_: Resultado | null, form: FormData): Promise<Resu
     if (k === "telegramChatId" && v && !/^-?\d+$/.test(v)) {
       return { ok: false, msg: "El ID del chat es un número. Déjalo vacío: se llena solo al escribirle /start al bot y pulsar Probar." };
     }
+    if (k === "equipo" && v && !(EQUIPOS as readonly string[]).includes(v)) return { ok: false, msg: "Elige cómo grabas." };
     ajustes[k] = !v ? null : k === "presupuestoMensualCop" ? Number(v.replace(/\D/g, "")) || null : v;
   }
   if (Object.keys(ajustes).length) {

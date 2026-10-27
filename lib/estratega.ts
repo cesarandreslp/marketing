@@ -98,7 +98,10 @@ async function contexto(c: Cuenta, semana: string) {
   ]);
   const perfil =
     `${c.nombrePublico}, ciudadano de ${c.municipio} (${c.departamento}) que quiere darse a conocer con miras a ` +
-    `${c.cargo === "concejo" ? "el Concejo municipal" : c.cargo}. Trabaja solo: graba él/ella mismo con el celular.` +
+    `${c.cargo === "concejo" ? "el Concejo municipal" : c.cargo}. ` +
+    (c.ajustes.equipo === "audiovisual"
+      ? "Tiene equipo audiovisual: los guiones pueden pedir planos (general, medio, primer plano), tomas de apoyo (b-roll) y más de una locación."
+      : "Trabaja solo: graba él/ella mismo con el celular.") +
     (c.ajustes.temasPropios ? `\nSus temas propios: ${c.ajustes.temasPropios.replace(/\n/g, "; ")}.` : "") +
     (c.ajustes.barrios ? `\nBarrios/zonas prioritarias: ${c.ajustes.barrios.replace(/\n/g, ", ")}.` : "");
   const motivos = rechazos.map((r) => r.motivo).filter((m) => m && m !== "Sin motivo");
@@ -161,7 +164,7 @@ const GUIA_RED: Record<Red, string> = {
 async function redactar(c: Cuenta, ctx: Ctx, k: Concepto, redes: Red[], corregir?: { previo: string; motivo: string }) {
   const formato =
     k.formato === "video"
-      ? `"guion": guion para grabar en cámara (45–90 s), con [GANCHO 0–3 s], [DESARROLLO] y [CIERRE] que invite a comentar; indica dónde grabar (un lugar real del municipio). "promptMedia": prompt para generar la portada/miniatura con IA (sin rostros de terceros ni símbolos oficiales).`
+      ? `"guion": guion para grabar en cámara (45–90 s), con [GANCHO 0–3 s], [DESARROLLO] y [CIERRE] que invite a comentar; ${c.ajustes.equipo === "audiovisual" ? "indica locaciones reales del municipio (puede ser más de una), el plano de cada parte y las tomas de apoyo (b-roll)" : "indica dónde grabar (un lugar real del municipio)"}. "promptMedia": prompt para generar la portada/miniatura con IA (sin rostros de terceros ni símbolos oficiales).`
       : k.formato === "carrusel"
         ? `"guion": texto de cada lámina numerada (5–7), una idea por lámina, la última con una pregunta. "promptMedia": prompt de estilo visual para las láminas (colores, tipografía, íconos; sin símbolos oficiales).`
         : `"guion" y "promptMedia" vacíos.`;

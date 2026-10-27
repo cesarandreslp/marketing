@@ -248,6 +248,14 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
               valor={c.inicioPropaganda}
               ayuda="Desde esta fecha el sistema redacta en modo campaña: ya puedes presentarte como candidato y pedir el voto. Confírmala en el calendario de la Registraduría. Vacío = pre-campaña."
             />
+            <div>
+              <label className="etiqueta" htmlFor="equipo">¿Cómo grabas?</label>
+              <select id="equipo" name="equipo" defaultValue={a.equipo ?? "solo"} className="campo">
+                <option value="solo">Solo, con el celular</option>
+                <option value="audiovisual">Con equipo audiovisual</option>
+              </select>
+              <p className="ayuda">Con equipo, los guiones piden planos, tomas de apoyo (b-roll) y más de una locación.</p>
+            </div>
             <Campo nombre="presupuestoMensualCop" etiqueta="Presupuesto mensual (COP)" tipo="number" min={0} step={1000} valor={a.presupuestoMensualCop} />
           </Seccion>
         </Bloque>

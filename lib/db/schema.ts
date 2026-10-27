@@ -18,12 +18,15 @@ import {
  */
 export const CARGOS = ["concejo", "alcaldia", "asamblea", "gobernacion"] as const;
 
+export const EQUIPOS = ["solo", "audiovisual"] as const;
+
 export type Ajustes = {
   partido?: string;
   temasPropios?: string; // uno por línea
   barrios?: string; // uno por línea: barrios, comunas, corregimientos prioritarios
   fuentesRss?: string; // una URL por línea
   presupuestoMensualCop?: number;
+  equipo?: (typeof EQUIPOS)[number]; // vacío = "solo"
   // Solo usuarios públicos (contexto para la IA). Las credenciales de redes viven en n8n.
   facebookPagina?: string;
   instagramUsuario?: string;
