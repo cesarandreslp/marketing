@@ -6,7 +6,11 @@
  * personales, menores, logos) se suma en la fase 2 sobre esta misma salida.
  */
 const PROHIBIDO: [RegExp, string][] = [
-  [/\bvot(a|e|en|ar|o|os)\b/i, "Pide o menciona el voto (propaganda anticipada)"],
+  // Solo el pedido de voto o apoyo; la pedagogía electoral («cuidar el voto», «testigos electorales») es legal.
+  [
+    /\bvot(a|e|en)\s+por\b|\b(tu|su|el)\s+voto\s+(por|para)\s+m[ií](?![a-záéíóúñ])|\b(dame|denme|deme|reg[aá]la(me|nme)|reg[aá]le(me|nme))\s+(tu|su)\s+voto\b|\bacomp[aá][ñn](a|e|en)me\s+en\s+20\d\d\b|\bay[uú]d(a|e|en)me\s+a\s+llegar\b|\bap[oó]y(a|e|en)me\s+en\s+las\s+urnas\b/i,
+    "Pide el voto o apoyo electoral (propaganda anticipada)",
+  ],
   [/\bcandidat[oa]s?\b|\bcandidatura\b/i, "Se presenta como candidato/a"],
   [
     /\b(concejal(es)?|alcalde(sa)?|diputad[oa]s?|gobernador(a)?)\s*20\d\d|\b20\d\d\s*[-–]\s*20\d\d\b/i,

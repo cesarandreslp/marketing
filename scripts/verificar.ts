@@ -8,7 +8,29 @@ import { rutaDeMedio } from "../lib/medios";
 
 // Filtro de pre-campaña
 assert.deepEqual(revisar("Fui al barrio Popular y me hablaron del agua."), []);
-assert.ok(revisar("Vota por mí en 2027").length > 0);
+for (const pedido of [
+  "Vota por mí en 2027",
+  "Voten por el cambio",
+  "Quiero tu voto por mí",
+  "Dame tu voto",
+  "Regálame tu voto este domingo",
+  "Acompáñame en 2027",
+  "Ayúdame a llegar al Concejo",
+  "Apóyame en las urnas",
+]) {
+  assert.ok(revisar(pedido).length > 0, pedido);
+}
+// Pedagogía electoral: legal en pre-campaña.
+for (const pedagogia of [
+  "Yo le enseñé a Buga a cuidar su voto",
+  "Cómo funciona el voto y los testigos electorales",
+  "El que cuida el voto",
+  "Un voto informado vale más",
+  "¿Quieres ser testigo electoral?",
+  "Así se cuenta un voto en la mesa",
+]) {
+  assert.deepEqual(revisar(pedagogia), [], pedagogia);
+}
 assert.ok(revisar("Soy candidato al Concejo").length > 0);
 assert.ok(revisar("Concejal 2028-2031").length > 0);
 assert.ok(revisar("Alcaldesa 2028").length > 0);
