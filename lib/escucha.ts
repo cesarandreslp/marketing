@@ -49,7 +49,7 @@ export async function recolectar(c: Cuenta) {
   return { nuevos, porFuente };
 }
 
-type Clasificacion = {
+export type Clasificacion = {
   id: number;
   relevancia: number;
   tema: string;
@@ -88,28 +88,39 @@ export async function clasificar(c: Cuenta, maximo = 200) {
       temperatura: 0.1,
     });
 
-    const ids = new Set(lote.map((x) => x.id));
-    for (const s of salida) {
-      if (!ids.has(s.id)) continue;
-      const original = lote.find((x) => x.id === s.id)!;
-      await db
-        .update(items)
-        .set({
-          clasificadoEn: new Date(),
-          relevancia: Math.max(0, Math.min(3, Math.round(Number(s.relevancia) || 0))),
-          tema: (TEMAS as readonly string[]).includes(s.tema) ? s.tema : "otro",
-          comuna: s.comuna || null,
-          sentimiento: s.sentimiento,
-          emocion: s.emocion,
-          resumen: s.resumen?.slice(0, 300),
-          // Ley 1581: de las capturas reenviadas solo queda el resumen anonimizado.
-          ...(original.fuente === "telegram" && s.resumen ? { texto: s.resumen } : {}),
-        })
-        .where(and(eq(items.id, s.id), eq(items.cuentaId, c.id)));
-      hechos++;
-    }
+    hechos += await guardarClasificacion(c.id, lote, salida);
   }
   return { clasificados: hechos, pendientes: pendientes.length - hechos };
+}
+
+/** Escribe la clasificación en la base (la usa la IA automática y la clasificación manual). */
+export async function guardarClasificacion(
+  cuentaId: number,
+  lote: { id: number; fuente: string }[],
+  salida: Clasificacion[],
+) {
+  const porId = new Map(lote.map((x) => [x.id, x]));
+  let hechos = 0;
+  for (const s of salida) {
+    const original = porId.get(s.id);
+    if (!original) continue;
+    await db
+      .update(items)
+      .set({
+        clasificadoEn: new Date(),
+        relevancia: Math.max(0, Math.min(3, Math.round(Number(s.relevancia) || 0))),
+        tema: (TEMAS as readonly string[]).includes(s.tema) ? s.tema : "otro",
+        comuna: s.comuna || null,
+        sentimiento: s.sentimiento,
+        emocion: s.emocion,
+        resumen: s.resumen?.slice(0, 300),
+        // Ley 1581: de las capturas reenviadas solo queda el resumen anonimizado.
+        ...(original.fuente === "telegram" && s.resumen ? { texto: s.resumen } : {}),
+      })
+      .where(and(eq(items.id, s.id), eq(items.cuentaId, cuentaId)));
+    hechos++;
+  }
+  return hechos;
 }
 
 export async function escuchar(c: Cuenta) {

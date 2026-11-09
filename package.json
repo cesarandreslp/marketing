@@ -9,6 +9,7 @@
     "lint": "eslint",
     "db:push": "drizzle-kit push",
     "verificar": "tsx scripts/verificar.ts",
+    "clasificar-manual": "tsx scripts/clasificar-manual.ts",
     "restablecer-clave": "tsx scripts/restablecer-clave.ts"
   },
   "dependencies": {
