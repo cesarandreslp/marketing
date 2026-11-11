@@ -7,6 +7,7 @@ import { CARGOS, db, secretos, usuarios } from "./db";
  * Así el costo de IA, los límites de uso y las redes son de cada quien.
  */
 export const SECRETOS = {
+  anthropic_api_key: { grupo: "ia", etiqueta: "Claude (Anthropic)", ayuda: "De pago, rápido y estable. Clasifica con Haiku y redacta con Sonnet; pocos pesos al mes.", url: "https://console.anthropic.com/settings/keys" },
   zai_api_key: { grupo: "ia", etiqueta: "Z.AI (GLM)", ayuda: "Gratis con GLM-4.7-Flash. Trabajo masivo.", url: "https://z.ai/manage-apikey/apikey-list" },
   mistral_api_key: { grupo: "ia", etiqueta: "Mistral", ayuda: "Textos finales en español y filtro.", url: "https://console.mistral.ai/api-keys" },
   gemini_api_key: { grupo: "ia", etiqueta: "Google Gemini", ayuda: "Documentos largos, PDFs y sesiones del Concejo. Tiene capa gratis.", url: "https://aistudio.google.com/apikey" },

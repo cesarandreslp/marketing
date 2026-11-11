@@ -184,7 +184,7 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
     estadoSecretos(cuentaId),
   ]);
   const a = c.ajustes;
-  const iaConectadas = (["zai_api_key", "mistral_api_key", "gemini_api_key", "xai_api_key"] as const).filter((k) => estado.has(k));
+  const iaConectadas = (["anthropic_api_key", "zai_api_key", "mistral_api_key", "gemini_api_key", "xai_api_key"] as const).filter((k) => estado.has(k));
 
   return (
     <div className="grid gap-6 md:grid-cols-[180px_1fr]">
@@ -285,7 +285,7 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
           )}
         >
           <Seccion>
-            {(["zai_api_key", "mistral_api_key", "gemini_api_key", "xai_api_key"] as const).map((k) => (
+            {(["anthropic_api_key", "zai_api_key", "mistral_api_key", "gemini_api_key", "xai_api_key"] as const).map((k) => (
               <Secreto key={k} clave={k} estado={estado} />
             ))}
           </Seccion>

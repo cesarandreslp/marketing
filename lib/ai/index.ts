@@ -8,6 +8,7 @@
  */
 import { leerSecretos } from "../cuenta";
 import { AIError, AIProvider, PeticionJSON } from "./provider";
+import { crearAnthropic } from "./anthropic";
 import { crearGemini } from "./gemini";
 import { crearOpenAICompat } from "./openai";
 
@@ -17,6 +18,9 @@ type Llaves = Awaited<ReturnType<typeof leerSecretos>>;
 
 export function proveedores(k: Llaves) {
   return {
+    // Claude (de pago) va primero: rápido y sin límites de plan gratis. Haiku clasifica, Sonnet redacta.
+    anthropic_haiku: k.anthropic_api_key ? crearAnthropic(k.anthropic_api_key, "claude-haiku-5-5", "low") : undefined,
+    anthropic_sonnet: k.anthropic_api_key ? crearAnthropic(k.anthropic_api_key, "claude-sonnet-5-5", "medium") : undefined,
     zai_api_key: k.zai_api_key ? crearOpenAICompat("zai", k.zai_api_key, "glm-4.7-flash") : undefined,
     mistral_api_key: k.mistral_api_key
       ? crearOpenAICompat("mistral", k.mistral_api_key, "mistral-small-latest")
@@ -29,8 +33,8 @@ export function proveedores(k: Llaves) {
 function cadena(k: Llaves, rol: Rol): AIProvider[] {
   const p = proveedores(k);
   const orden = {
-    masivo: [p.zai_api_key, p.gemini_api_key, p.mistral_api_key],
-    textos: [p.mistral_api_key, p.gemini_api_key, p.zai_api_key],
+    masivo: [p.anthropic_haiku, p.zai_api_key, p.gemini_api_key, p.mistral_api_key],
+    textos: [p.anthropic_sonnet, p.mistral_api_key, p.gemini_api_key, p.zai_api_key],
     documentos: [p.gemini_api_key],
     x: [p.xai_api_key, p.mistral_api_key],
   }[rol];

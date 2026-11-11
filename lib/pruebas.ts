@@ -14,6 +14,14 @@ export async function probarServicio(cuentaId: number, clave: ClaveSecreto): Pro
   const [cuenta] = await db.select().from(cuentas).where(eq(cuentas.id, cuentaId));
   try {
     switch (clave) {
+      case "anthropic_api_key": {
+        await proveedores(k).anthropic_haiku!.generarJSON({
+          sistema: "Eres una prueba de conexión.",
+          prompt: 'Devuelve {"ok": true}',
+          maxTokens: 500,
+        });
+        return { ok: true, msg: "Conexión correcta." };
+      }
       case "zai_api_key":
       case "mistral_api_key":
       case "gemini_api_key":

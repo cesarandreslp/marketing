@@ -138,7 +138,7 @@ export default async function Bandeja() {
   ]);
   const semanas = Map.groupBy(lista, (p) => p.semana);
   const haySiguiente = semanas.has(siguiente);
-  const hayIA = ["zai_api_key", "mistral_api_key", "gemini_api_key"].some((k) => secretos.has(k));
+  const hayIA = ["anthropic_api_key", "zai_api_key", "mistral_api_key", "gemini_api_key"].some((k) => secretos.has(k));
 
   const pasos = [
     {
