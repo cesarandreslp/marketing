@@ -5,6 +5,7 @@ import { crearToken, leerToken } from "../lib/sesion";
 import { nombresMunicipio, parsearFeed } from "../lib/fuentes";
 import { fechaHora, proximoLunes } from "../lib/estratega";
 import { rutaDeMedio } from "../lib/medios";
+import { filasAItems, leerLineasRobots } from "../lib/browseai";
 
 // Filtro de pre-campaña
 assert.deepEqual(revisar("Fui al barrio Popular y me hablaron del agua."), []);
@@ -104,5 +105,21 @@ assert.equal(rutaDeMedio(7, nom)?.mime, "video/mp4");
 assert.equal(rutaDeMedio(8, nom), null); // de otra cuenta
 assert.equal(rutaDeMedio(7, "../7-123e4567-e89b-12d3-a456-426614174000.mp4"), null);
 assert.equal(rutaDeMedio(7, "7-123e4567-e89b-12d3-a456-426614174000.exe"), null);
+
+// Robots de Browse AI: filas → menciones
+const filas = { Publicaciones: [
+  { Position: "1", Texto: "-" }, // fila vacía
+  { Position: "2", Texto: "Atentado en la vía Buga Tuluá hoy", Enlace: "https://www.facebook.com/x/posts/1" },
+  { Position: "3", texto: "Se presentó un accidente en la vía" }, // sin enlace
+] };
+const menciones = filasAItems(filas, "facebook", "https://www.facebook.com/search/top?q=buga");
+assert.equal(menciones.length, 2);
+assert.equal(menciones[0].url, "https://www.facebook.com/x/posts/1");
+assert.match(menciones[1].url!, /^https:\/\/www\.facebook\.com\/search\/top\?q=buga#[0-9a-f]{16}$/);
+assert.equal(filasAItems(null, "facebook", "u").length, 0);
+assert.deepEqual(leerLineasRobots("facebook abc\nbasura\ntiktok def https://tiktok.com/tag/bugavalle\nfacebook"), [
+  { red: "facebook", id: "abc", url: undefined },
+  { red: "tiktok", id: "def", url: "https://tiktok.com/tag/bugavalle" },
+]);
 
 console.log("verificación OK");

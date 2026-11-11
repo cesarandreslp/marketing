@@ -40,6 +40,12 @@ export async function probarServicio(cuentaId: number, clave: ClaveSecreto): Pro
           ? { ok: true, msg: `Conectado. Publicará solo en: ${redes.join(", ")}.` }
           : { ok: true, msg: "Conectado, pero aún no hay redes conectadas en Postiz. Agrégalas allá con «Add Channel»." };
       }
+      case "browseai_api_key": {
+        const r = await fetch("https://api.browse.ai/v2/robots", { headers: { authorization: `Bearer ${valor}` } });
+        if (!r.ok) return { ok: false, msg: `Browse AI respondió ${r.status}. Revisa la clave.` };
+        const n = ((await r.json()) as { robots?: { totalCount?: number } }).robots?.totalCount ?? 0;
+        return { ok: true, msg: `Browse AI acepta la clave. Robots en tu cuenta: ${n}.` };
+      }
       case "n8n_api_key": {
         const r = await fetch(`${process.env.N8N_URL || "http://localhost:5678"}/api/v1/workflows?limit=1`, {
           headers: { "x-n8n-api-key": valor, accept: "application/json" },

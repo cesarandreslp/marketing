@@ -25,6 +25,7 @@ export type Ajustes = {
   temasPropios?: string; // uno por línea
   barrios?: string; // uno por línea: barrios, comunas, corregimientos prioritarios
   fuentesRss?: string; // una URL por línea
+  robotsRedes?: string; // una línea por robot de Browse AI: "<red> <id del robot> [url]"
   presupuestoMensualCop?: number;
   equipo?: (typeof EQUIPOS)[number]; // vacío = "solo"
   // Solo usuarios públicos (contexto para la IA). Las credenciales de redes viven en n8n.

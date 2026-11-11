@@ -2,6 +2,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { generarJSON } from "./ai";
 import { leerSecretos } from "./cuenta";
 import { cuentas, db, items } from "./db";
+import { leerLineasRobots, leerRobot } from "./browseai";
 import { buscarEnX, ItemNuevo, leerFeed, urlGoogleNoticias } from "./fuentes";
 
 export const TEMAS = [
@@ -32,6 +33,11 @@ export async function recolectar(c: Cuenta) {
     ...feeds.map((u) => [new URL(u).hostname, leerFeed(u)] as [string, Promise<ItemNuevo[]>]),
   ];
   if (k.xai_api_key) tareas.push(["X (Grok)", buscarEnX(k.xai_api_key, c.municipio, c.departamento)]);
+  if (k.browseai_api_key) {
+    for (const r of leerLineasRobots(c.ajustes.robotsRedes)) {
+      tareas.push([`${r.red} (Browse AI ${r.id.slice(-4)})`, leerRobot(k.browseai_api_key, r.red, r.id, r.url)]);
+    }
+  }
 
   const resultados = await Promise.allSettled(tareas.map(([, p]) => p));
   const porFuente: Record<string, number | string> = {};

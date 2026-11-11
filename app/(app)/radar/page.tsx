@@ -8,7 +8,7 @@ import { escucharAhora, resumenAhora } from "./acciones";
 
 export const dynamic = "force-dynamic";
 
-const FUENTE: Record<string, string> = { noticias: "Noticias", rss: "Medio local", x: "X", telegram: "Captura", youtube: "YouTube" };
+const FUENTE: Record<string, string> = { noticias: "Noticias", rss: "Medio local", x: "X", telegram: "Captura", youtube: "YouTube", facebook: "Facebook", instagram: "Instagram", tiktok: "TikTok" };
 
 function Tendencia({ actual, anterior }: { actual: number; anterior: number }) {
   if (anterior === 0) return <span className="text-xs text-marca">nuevo</span>;

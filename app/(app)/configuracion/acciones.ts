@@ -25,7 +25,7 @@ const Perfil = z.object({
 });
 
 const AJUSTES = [
-  "partido", "temasPropios", "barrios", "fuentesRss", "presupuestoMensualCop", "equipo",
+  "partido", "temasPropios", "barrios", "fuentesRss", "robotsRedes","presupuestoMensualCop", "equipo",
   "facebookPagina", "instagramUsuario", "youtubeCanal", "tiktokUsuario", "xUsuario", "telegramChatId",
 ] as const satisfies readonly (keyof Ajustes)[];
 

@@ -12,6 +12,7 @@ export const SECRETOS = {
   mistral_api_key: { grupo: "ia", etiqueta: "Mistral", ayuda: "Textos finales en español y filtro.", url: "https://console.mistral.ai/api-keys" },
   gemini_api_key: { grupo: "ia", etiqueta: "Google Gemini", ayuda: "Documentos largos, PDFs y sesiones del Concejo. Tiene capa gratis.", url: "https://aistudio.google.com/apikey" },
   xai_api_key: { grupo: "ia", etiqueta: "xAI (Grok)", ayuda: "Escucha en X con búsqueda nativa.", url: "https://console.x.ai" },
+  browseai_api_key: { grupo: "redes", etiqueta: "API key de Browse AI", ayuda: "Lee Facebook, Instagram y TikTok con tus robots. En Browse AI: menú API → Generate API key.", url: "https://dashboard.browse.ai/api" },
   n8n_api_key: { grupo: "n8n", etiqueta: "API key de n8n", ayuda: "En n8n: Settings → n8n API → Create an API key. Permite instalar los flujos con un clic.", url: "/automatizaciones?ruta=/settings/api" },
   postiz_api_key: { grupo: "redes", etiqueta: "API key de Postiz", ayuda: "En Postiz: Settings → Public API → copia la clave. Permite que la app programe las piezas aprobadas.", url: "http://localhost:4007/settings" },
   telegram_bot_token: { grupo: "avisos", etiqueta: "Token del bot de Telegram", ayuda: "Créalo con @BotFather. Resumen diario y aprobaciones rápidas.", url: "https://t.me/BotFather" },

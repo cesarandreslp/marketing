@@ -305,7 +305,17 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
               <Campo nombre="tiktokUsuario" etiqueta="TikTok" valor={a.tiktokUsuario} placeholder="@usuario" />
               <Campo nombre="xUsuario" etiqueta="X" valor={a.xUsuario} placeholder="@usuario" ayuda="La escucha en X usa tu clave de Grok." />
             </div>
+            <Secreto clave="browseai_api_key" estado={estado} />
+            <Area
+              nombre="robotsRedes"
+              etiqueta="Robots de Browse AI (lectura de Facebook, Instagram y TikTok)"
+              valor={a.robotsRedes}
+              ayuda="Una línea por robot: la red, el ID del robot y, si quieres, otra dirección para que la lea. Se corren en cada escucha."
+              placeholder="facebook 01a1c11d-7841-70e9-b673-c38fbc7ef9ae"
+            />
           </Seccion>
+          {/* Fuera de <Seccion>: Probar es otro formulario y HTML no admite uno dentro de otro. */}
+          {estado.has("browseai_api_key") && <Probar servicio="browseai_api_key" />}
         </Bloque>
 
         <Bloque
