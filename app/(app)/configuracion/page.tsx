@@ -264,6 +264,8 @@ export default async function Configuracion({ searchParams }: { searchParams: Pr
           <Seccion>
             <Area nombre="barrios" etiqueta="Barrios, comunas y corregimientos prioritarios" valor={a.barrios} ayuda="Uno por línea." placeholder={"El Albañico\nLa Merced\nCorregimiento El Placer"} />
             <Area nombre="temasPropios" etiqueta="Tus temas" valor={a.temasPropios} ayuda="Uno por línea. Las banderas que quieres que la gente asocie contigo." placeholder={"Control de las finanzas públicas\nMovilidad en el centro"} />
+            <Area nombre="temasCalientes" etiqueta="Temas que están pasando" valor={a.temasCalientes} ayuda="Uno por línea, lo que sabes de la calle aunque aún no salga en medios. Se buscan en noticias y se tienen en cuenta al armar la semana." placeholder={"Recolección de basuras: llega un nuevo operador al servicio"} />
+            <Area nombre="competidores" etiqueta="Competidores a vigilar" valor={a.competidores} ayuda="Uno por línea: «Nombre | enlace a su perfil o página» (el enlace es opcional). Se buscan sus noticias y, si hay un robot de perfil en Browse AI, también su red." placeholder={"Nombre Apellido | https://www.facebook.com/su.pagina"} />
             <Area nombre="fuentesRss" etiqueta="Medios locales (RSS)" valor={a.fuentesRss} ayuda="Una dirección RSS por línea." placeholder="https://medio-local.com/feed" />
           </Seccion>
         </Bloque>

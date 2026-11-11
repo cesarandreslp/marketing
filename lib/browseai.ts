@@ -22,15 +22,25 @@ const dato = (f: Fila, ...nombres: string[]) => {
   return undefined;
 };
 
+/** Quita el rastreo de Facebook (`__cft__`, `__tn__`…): sin eso el mismo enlace cambia en cada corrida y se duplica. */
+export function limpiarEnlace(u: string): string {
+  if (!URL.canParse(u)) return u;
+  const url = new URL(u);
+  for (const k of [...url.searchParams.keys()]) if (k.startsWith("__") || k.startsWith("utm_") || ["igsh", "igshid", "fbclid", "si"].includes(k)) url.searchParams.delete(k);
+  url.hash = "";
+  return url.toString();
+}
+
 /** Filas de `capturedLists` → menciones. Las filas sin texto (anuncios, videos) se descartan. */
 export function filasAItems(listas: Record<string, Fila[]> | null | undefined, red: RedRobot, origen: string): ItemNuevo[] {
   return Object.values(listas ?? {}).flatMap((filas) =>
     (filas ?? []).flatMap((f) => {
-      const texto = dato(f, "texto", "descripcion", "text", "description");
+      // Facebook recorta las publicaciones largas y deja «… Ver más» al final.
+      const texto = dato(f, "texto", "descripcion", "text", "description")?.replace(/[\s.…]*Ver más\s*$/i, "");
       if (!texto || texto.length < 8) return [];
       const enlace = dato(f, "enlace", "url", "link");
       // Sin enlace de la publicación, se identifica por el texto para no repetirla cada día.
-      const url = enlace?.startsWith("https://") ? enlace : `${origen}#${createHash("sha1").update(texto).digest("hex").slice(0, 16)}`;
+      const url = enlace?.startsWith("https://") ? limpiarEnlace(enlace) : `${origen}#${createHash("sha1").update(texto).digest("hex").slice(0, 16)}`;
       return [{ fuente: red, url, titulo: null, texto: texto.slice(0, 2000), publicadoEn: null }];
     }),
   );
@@ -70,11 +80,11 @@ export async function leerRobot(apiKey: string, red: RedRobot, robotId: string, 
   }
 }
 
-/** Una línea por robot: "<red> <id del robot> [url]". Las líneas mal escritas se ignoran. */
+/** Una línea por robot: "<red> <id del robot> [url | perfil]". «perfil» = robot que se usa con los perfiles de los competidores. */
 export function leerLineasRobots(texto: string | undefined) {
   return (texto ?? "").split("\n").flatMap((l) => {
     const [red, id, url] = l.trim().split(/\s+/);
     const r = red?.toLowerCase() as RedRobot;
-    return REDES_ROBOT.includes(r) && id ? [{ red: r, id, url: url && URL.canParse(url) ? url : undefined }] : [];
+    return REDES_ROBOT.includes(r) && id ? [{ red: r, id, url: url && URL.canParse(url) ? url : undefined, perfil: url?.toLowerCase() === "perfil" }] : [];
   });
 }

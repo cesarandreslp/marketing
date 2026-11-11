@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, ne, sql } from "drizzle-orm";
 import { generarJSON } from "./ai";
 import { cuentas, db, items, resumenes } from "./db";
 import { radar } from "./radar";
@@ -14,7 +14,7 @@ export async function generarResumen(c: Cuenta) {
     db
       .select({ fuente: items.fuente, tema: items.tema, comuna: items.comuna, emocion: items.emocion, resumen: items.resumen, url: items.url })
       .from(items)
-      .where(and(eq(items.cuentaId, c.id), gte(items.relevancia, 2), gte(sql`coalesce(${items.publicadoEn}, ${items.creadoEn})`, sql`now() - interval '36 hours'`)))
+      .where(and(eq(items.cuentaId, c.id), ne(items.fuente, "competencia"), gte(items.relevancia, 2), gte(sql`coalesce(${items.publicadoEn}, ${items.creadoEn})`, sql`now() - interval '36 hours'`)))
       .orderBy(desc(items.relevancia))
       .limit(60),
     radar(c.id, 6),

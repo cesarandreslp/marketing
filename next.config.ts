@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ["pdfkit"], // carga sus fuentes del disco: no se empaqueta
 };
 
 export default nextConfig;

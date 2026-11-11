@@ -5,10 +5,11 @@
  *   3. revisión: una segunda lectura busca riesgos legales y éticos (además del filtro por regex).
  * Todo queda en borrador: nada sale sin tu aprobación.
  */
-import { and, desc, eq, gte, isNotNull, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNotNull, notInArray, sql } from "drizzle-orm";
 import { generarJSON, SaturacionError } from "./ai";
 import { enCampana, revisar } from "./cumplimiento";
 import { cuentas, db, items, piezas } from "./db";
+import { enlaceVerificable } from "./fuentes";
 import { radar } from "./radar";
 import { enviar } from "./telegram";
 
@@ -77,14 +78,26 @@ export function redesActivas(c: Cuenta): Set<Red> {
 
 /** La etapa (pre-campaña o campaña) se fija por el lunes de la semana: una semana a caballo queda en pre-campaña. */
 async function contexto(c: Cuenta, semana: string) {
-  const [temas, menciones, rechazos, anteriores] = await Promise.all([
-    radar(c.id, 8),
+  // Solo lo verificable (con enlace a la nota o publicación) y que no es publicidad (relevancia 0).
+  const recientes = (medios: boolean) =>
     db
-      .select({ id: items.id, url: items.url, tema: items.tema, comuna: items.comuna, emocion: items.emocion, resumen: items.resumen })
+      .select({ id: items.id, url: items.url, fuente: items.fuente, titulo: items.titulo, tema: items.tema, comuna: items.comuna, resumen: items.resumen })
       .from(items)
-      .where(and(eq(items.cuentaId, c.id), gte(items.relevancia, 2), gte(sql`coalesce(${items.publicadoEn}, ${items.creadoEn})`, sql`now() - interval '10 days'`)))
+      .where(
+        and(
+          eq(items.cuentaId, c.id),
+          gte(items.relevancia, 2),
+          sql`${items.url} not like '%#%'`,
+          medios ? inArray(items.fuente, MEDIOS) : notInArray(items.fuente, [...MEDIOS, "competencia"]),
+          gte(sql`coalesce(${items.publicadoEn}, ${items.creadoEn})`, sql`now() - interval '10 days'`),
+        ),
+      )
       .orderBy(desc(items.relevancia), desc(items.creadoEn))
-      .limit(50),
+      .limit(medios ? 25 : 30);
+  const [temas, noticias, menciones, rechazos, anteriores, competencia] = await Promise.all([
+    radar(c.id, 8),
+    recientes(true),
+    recientes(false),
     db
       .select({ motivo: piezas.motivoRechazo })
       .from(piezas)
@@ -95,6 +108,12 @@ async function contexto(c: Cuenta, semana: string) {
       .selectDistinct({ concepto: piezas.concepto })
       .from(piezas)
       .where(and(eq(piezas.cuentaId, c.id), gte(piezas.semana, sql`current_date - 21`), isNotNull(piezas.concepto))),
+    db
+      .select({ resumen: items.resumen })
+      .from(items)
+      .where(and(eq(items.cuentaId, c.id), eq(items.fuente, "competencia"), gte(items.relevancia, 1), gte(sql`coalesce(${items.publicadoEn}, ${items.creadoEn})`, sql`now() - interval '14 days'`)))
+      .orderBy(desc(items.creadoEn))
+      .limit(15),
   ]);
   const perfil =
     `${c.nombrePublico}, ciudadano de ${c.municipio} (${c.departamento}) que quiere darse a conocer con miras a ` +
@@ -102,12 +121,18 @@ async function contexto(c: Cuenta, semana: string) {
     (c.ajustes.equipo === "audiovisual"
       ? "Tiene equipo audiovisual: los guiones pueden pedir planos (general, medio, primer plano), tomas de apoyo (b-roll) y más de una locación."
       : "Trabaja solo: graba él/ella mismo con el celular.") +
+    (c.ajustes.temasCalientes
+      ? `\nTemas que están pasando en el municipio según ${c.nombrePublico} (aún sin confirmar en medios; trátalos como tema, nunca como hecho comprobado ni insinúes irregularidades): ${c.ajustes.temasCalientes.replace(/\n/g, "; ")}.`
+      : "") +
     (c.ajustes.temasPropios ? `\nSus temas propios: ${c.ajustes.temasPropios.replace(/\n/g, "; ")}.` : "") +
     (c.ajustes.barrios ? `\nBarrios/zonas prioritarias: ${c.ajustes.barrios.replace(/\n/g, ", ")}.` : "");
   const motivos = rechazos.map((r) => r.motivo).filter((m) => m && m !== "Sin motivo");
   const campana = enCampana(c.inicioPropaganda, fechaHora(semana, 1, "00:00"));
-  return { temas, menciones, motivos, anteriores: anteriores.map((a) => a.concepto!), perfil, campana, reglas: REGLAS(campana) };
+  return { temas, noticias, menciones, competencia: competencia.map((x) => x.resumen).filter(Boolean) as string[], motivos, anteriores: anteriores.map((a) => a.concepto!), perfil, campana, reglas: REGLAS(campana) };
 }
+
+/** Fuentes que son medios de comunicación (el resto es conversación en redes). */
+const MEDIOS = ["noticias", "rss"];
 
 type Ctx = Awaited<ReturnType<typeof contexto>>;
 
@@ -136,9 +161,16 @@ async function planear(c: Cuenta, ctx: Ctx, redes: Set<Red>): Promise<Concepto[]
       `Formatos: video = vertical 45–90 s con la persona en cámara; carrusel = 5–7 láminas explicativas; post_x = opinión breve.\n` +
       `Reparte por pilares: ${Object.entries(PILARES).map(([k, v]) => `${k} (${v})`).join("; ")}.\n` +
       `Distribuye los días (1 = lunes … 7 = domingo); un post_x por día. Basa las ideas en lo que de verdad preocupa a la gente ` +
-      `y cita en "menciones" los [id] que la respaldan.\n\n` +
+      `y en las noticias de la semana, y cita en "menciones" los [id] que las respaldan.\n` +
+      `Las piezas de pilar «coyuntura» deben partir de una noticia de la lista, y al menos la mitad de los videos y carruseles ` +
+      `deben apoyarse en una noticia (reacciona al hecho con una propuesta, sin afirmar más de lo que dice la nota). ` +
+      `Ignora lo que sea publicidad.\n\n` +
       `Radar de la semana: ${ctx.temas.map((t) => `${t.tema} (${t.actual} menciones, emoción ${t.emocion}${t.comunas.length ? ", " + t.comunas.join("/") : ""})`).join("; ") || "sin datos aún"}\n\n` +
-      `Menciones:\n${ctx.menciones.map((m) => `[${m.id}] ${m.tema}${m.comuna ? " · " + m.comuna : ""}: ${m.resumen}`).join("\n") || "(ninguna)"}\n\n` +
+      `Noticias de la semana (medios):\n${ctx.noticias.map((n) => `[${n.id}] ${n.titulo ?? n.resumen} — ${n.resumen}`).join("\n") || "(ninguna)"}\n\n` +
+      `Conversación en redes:\n${ctx.menciones.map((m) => `[${m.id}] ${m.tema}${m.comuna ? " · " + m.comuna : ""}: ${m.resumen}`).join("\n") || "(ninguna)"}\n\n` +
+      (ctx.competencia.length
+        ? `Lo que publica la competencia (solo para diferenciarte y no repetir; NUNCA los nombres, cites ni ataques, ni respondas a lo que dicen):\n${ctx.competencia.map((x) => `- ${x}`).join("\n")}\n`
+        : "") +
       (ctx.anteriores.length ? `No repitas estos conceptos recientes: ${ctx.anteriores.join(" | ")}\n` : "") +
       (ctx.motivos.length ? `El usuario rechazó antes piezas por esto, evítalo: ${ctx.motivos.join(" | ")}\n` : ""),
     esquemaHint:
@@ -164,16 +196,16 @@ const GUIA_RED: Record<Red, string> = {
 async function redactar(c: Cuenta, ctx: Ctx, k: Concepto, redes: Red[], corregir?: { previo: string; motivo: string }) {
   const formato =
     k.formato === "video"
-      ? `"guion": guion para grabar en cámara (45–90 s), con [GANCHO 0–3 s], [DESARROLLO] y [CIERRE] que invite a comentar; ${c.ajustes.equipo === "audiovisual" ? "indica locaciones reales del municipio (puede ser más de una), el plano de cada parte y las tomas de apoyo (b-roll)" : "indica dónde grabar (un lugar real del municipio)"}. "promptMedia": prompt para generar la portada/miniatura con IA (sin rostros de terceros ni símbolos oficiales).`
+      ? `"guion": guion para grabar en cámara (45–90 s), con [GANCHO 0–3 s], [DESARROLLO] y [CIERRE] que invite a comentar; ${c.ajustes.equipo === "audiovisual" ? "indica locaciones reales del municipio (puede ser más de una), el plano de cada parte y las tomas de apoyo (b-roll)" : "indica dónde grabar (un lugar real del municipio)"}. El video lo graba ${c.nombrePublico} en persona, con celular o cámara. "promptMedia" vacío (la portada se toma del propio video).`
       : k.formato === "carrusel"
-        ? `"guion": texto de cada lámina numerada (5–7), una idea por lámina, la última con una pregunta. "promptMedia": prompt de estilo visual para las láminas (colores, tipografía, íconos; sin símbolos oficiales).`
+        ? `"guion": texto de cada lámina numerada (5–7), una idea por lámina, la última con una pregunta. "promptMedia": prompt para generar las láminas con IA. ${c.nombrePublico} (el candidato) debe aparecer en la imagen, y la IA recibirá su foto de referencia: describe escena, pose, expresión y ropa sobria, más el estilo visual (colores, tipografía). Sin otros rostros reconocibles, menores ni símbolos oficiales. Solo omite al candidato si la imagen hace imposible la participación humana (un mapa, un gráfico, una vista aérea): en ese caso el prompt empieza con «SIN CANDIDATO: » y el motivo.`
         : `"guion" y "promptMedia" vacíos.`;
-  const respaldo = ctx.menciones.filter((m) => k.menciones?.includes(m.id));
+  const respaldo = [...ctx.noticias, ...ctx.menciones].filter((m) => k.menciones?.includes(m.id));
   return generarJSON<Redaccion>(c.id, "textos", {
     sistema: `Eres el redactor de ${c.nombrePublico}. ${ctx.reglas}`,
     prompt:
       `Perfil: ${ctx.perfil}\n\nConcepto: ${k.concepto}\nPilar: ${k.pilar}\nIdea: ${k.idea}\n` +
-      (respaldo.length ? `Lo que dice la gente:\n${respaldo.map((m) => `- ${m.resumen}`).join("\n")}\n` : "") +
+      (respaldo.length ? `Base (noticias y lo que dice la gente; no afirmes más de lo que dicen):\n${respaldo.map((m) => `- ${MEDIOS.includes(m.fuente) ? "Noticia: " + (m.titulo ?? "") + " — " : ""}${m.resumen}`).join("\n")}\n` : "") +
       `\nEscribe ${formato}\n"copys": un texto por red adaptado a cada una:\n${redes.map((r) => `- ${GUIA_RED[r]}`).join("\n")}\n` +
       `Escribe en primera persona como ${c.nombrePublico}. Si usas una cifra, debe venir de lo que dice la gente o ser verificable; si no, no la uses.` +
       (corregir ? `\n\nVersión anterior (rechazada):\n${corregir.previo}\nMotivo del rechazo: ${corregir.motivo}\nCorrígela atendiendo el motivo.` : ""),
@@ -294,7 +326,7 @@ export async function generarSemana(c: Cuenta, semana = proximoLunes()) {
   }
   await db.delete(piezas).where(and(eq(piezas.cuentaId, c.id), eq(piezas.semana, semana), eq(piezas.estado, "borrador")));
   const filas = hechos.flatMap((h, i) => {
-    const fuentes = ctx.menciones.filter((m) => h.k.menciones?.includes(m.id) && m.url).map((m) => m.url!);
+    const fuentes = [...ctx.noticias, ...ctx.menciones].filter((m) => h.k.menciones?.includes(m.id) && enlaceVerificable(m.url)).map((m) => m.url!);
     return h.redes
       .filter((r) => h.copys[r]?.trim())
       .map((r) => {

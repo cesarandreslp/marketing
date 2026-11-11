@@ -24,6 +24,8 @@ export type Ajustes = {
   partido?: string;
   temasPropios?: string; // uno por línea
   barrios?: string; // uno por línea: barrios, comunas, corregimientos prioritarios
+  temasCalientes?: string; // uno por línea: lo que se sabe en la calle y aún no sale en medios
+  competidores?: string; // una línea: "Nombre | https://perfil-en-red (opcional)"
   fuentesRss?: string; // una URL por línea
   robotsRedes?: string; // una línea por robot de Browse AI: "<red> <id del robot> [url]"
   presupuestoMensualCop?: number;

@@ -1,14 +1,16 @@
 import Link from "next/link";
-import { and, desc, eq, gte, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, ne, sql } from "drizzle-orm";
 import { db, items, resumenes } from "@/lib/db";
+import { enlaceVerificable } from "@/lib/fuentes";
 import { radar } from "@/lib/radar";
 import { requerirSesion } from "@/lib/sesion";
 import { BotonAccion } from "../configuracion/ui";
 import { escucharAhora, resumenAhora } from "./acciones";
+import { PegarMencion } from "./pegar";
 
 export const dynamic = "force-dynamic";
 
-const FUENTE: Record<string, string> = { noticias: "Noticias", rss: "Medio local", x: "X", telegram: "Captura", youtube: "YouTube", facebook: "Facebook", instagram: "Instagram", tiktok: "TikTok" };
+const FUENTE: Record<string, string> = { noticias: "Noticias", rss: "Medio local", x: "X", telegram: "Captura", youtube: "YouTube", manual: "Manual", facebook: "Facebook", instagram: "Instagram", tiktok: "TikTok" };
 
 function Tendencia({ actual, anterior }: { actual: number; anterior: number }) {
   if (anterior === 0) return <span className="text-xs text-marca">nuevo</span>;
@@ -26,13 +28,13 @@ export default async function Radar({ searchParams }: { searchParams: Promise<{ 
   const hace7 = sql`now() - interval '7 days'`;
   const fecha = sql`coalesce(${items.publicadoEn}, ${items.creadoEn})`;
 
-  const [ranking, [ultimo], recientes, [{ total, pendientes }]] = await Promise.all([
+  const [ranking, [ultimo], recientes, [{ total, pendientes }], competencia] = await Promise.all([
     radar(cuentaId),
     db.select().from(resumenes).where(eq(resumenes.cuentaId, cuentaId)).orderBy(desc(resumenes.fecha)).limit(1),
     db
       .select()
       .from(items)
-      .where(and(eq(items.cuentaId, cuentaId), gte(items.relevancia, 1), gte(fecha, hace7), tema ? eq(items.tema, tema) : undefined))
+      .where(and(eq(items.cuentaId, cuentaId), gte(items.relevancia, 1), gte(fecha, hace7), ne(items.fuente, "competencia"), tema ? eq(items.tema, tema) : undefined))
       .orderBy(desc(items.relevancia), desc(fecha))
       .limit(40),
     db
@@ -41,7 +43,13 @@ export default async function Radar({ searchParams }: { searchParams: Promise<{ 
         pendientes: sql<number>`count(*) filter (where ${isNull(items.clasificadoEn)})::int`,
       })
       .from(items)
-      .where(and(eq(items.cuentaId, cuentaId), gte(fecha, hace7))),
+      .where(and(eq(items.cuentaId, cuentaId), ne(items.fuente, "competencia"), gte(fecha, hace7))),
+    db
+      .select()
+      .from(items)
+      .where(and(eq(items.cuentaId, cuentaId), eq(items.fuente, "competencia"), gte(fecha, sql`now() - interval '14 days'`)))
+      .orderBy(desc(fecha))
+      .limit(20),
   ]);
   const max = Math.max(1, ...ranking.map((r) => r.puntaje));
 
@@ -60,6 +68,8 @@ export default async function Radar({ searchParams }: { searchParams: Promise<{ 
           <BotonAccion accion={resumenAhora} texto="Enviar resumen" enCurso="Redactando…" />
         </div>
       </div>
+
+      <PegarMencion />
 
       {ultimo && (
         <section className="tarjeta">
@@ -132,14 +142,42 @@ export default async function Radar({ searchParams }: { searchParams: Promise<{ 
                 </span>
               </div>
               <p className="mt-2 text-sm">{m.resumen ?? m.titulo ?? m.texto.slice(0, 200)}</p>
-              {m.url && (
-                <a href={m.url} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs text-marca hover:underline">Ver fuente ↗</a>
+              {m.titulo && m.titulo !== m.resumen && <p className="mt-1 text-xs text-suave">{m.titulo}</p>}
+              {m.texto.length > 120 && (
+                <details className="mt-1 text-xs">
+                  <summary className="cursor-pointer text-suave">Ver texto completo</summary>
+                  <p className="mt-1 whitespace-pre-line">{m.texto}</p>
+                </details>
+              )}
+              {enlaceVerificable(m.url) ? (
+                <a href={m.url!} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs text-marca hover:underline">Ver fuente ↗</a>
+              ) : (
+                <p className="mt-1 text-xs text-suave">Sin enlace verificable: no se usa para armar contenido.</p>
               )}
             </li>
           ))}
         </ul>
       </section>
       </div>
+
+      {competencia.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-medium">Competencia · últimos 14 días</h2>
+          <p className="text-sm text-suave">Solo para conocer qué dicen y diferenciarte. No cuenta en los temas de la gente ni se cita en tus piezas.</p>
+          <ul className="grid gap-2 xl:grid-cols-2">
+            {competencia.map((m) => (
+              <li key={m.id} className="tarjeta p-4">
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  <span className="chip bg-fondo font-semibold">{m.titulo}</span>
+                  <span className="ml-auto text-suave">{(m.publicadoEn ?? m.creadoEn).toLocaleDateString("es-CO", { timeZone: "America/Bogota", day: "numeric", month: "short" })}</span>
+                </div>
+                <p className="mt-2 text-sm">{m.resumen ?? m.texto.slice(0, 200)}</p>
+                {enlaceVerificable(m.url) && <a href={m.url!} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs text-marca hover:underline">Ver fuente ↗</a>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

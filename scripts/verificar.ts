@@ -2,10 +2,12 @@ import assert from "node:assert/strict";
 import { enCampana, publicacionHabilitada, revisar } from "../lib/cumplimiento";
 import { cifrar, descifrar, hashClave, verificarClave } from "../lib/cifrado";
 import { crearToken, leerToken } from "../lib/sesion";
-import { nombresMunicipio, parsearFeed } from "../lib/fuentes";
+import { enlaceVerificable, nombresMunicipio, parsearFeed, urlsNoticias } from "../lib/fuentes";
+import { cuerpoDeNota } from "../lib/noticias";
+import { leerCompetidores } from "../lib/competencia";
 import { fechaHora, proximoLunes } from "../lib/estratega";
 import { rutaDeMedio } from "../lib/medios";
-import { filasAItems, leerLineasRobots } from "../lib/browseai";
+import { filasAItems, leerLineasRobots, limpiarEnlace } from "../lib/browseai";
 
 // Filtro de pre-campaña
 assert.deepEqual(revisar("Fui al barrio Popular y me hablaron del agua."), []);
@@ -118,8 +120,29 @@ assert.equal(menciones[0].url, "https://www.facebook.com/x/posts/1");
 assert.match(menciones[1].url!, /^https:\/\/www\.facebook\.com\/search\/top\?q=buga#[0-9a-f]{16}$/);
 assert.equal(filasAItems(null, "facebook", "u").length, 0);
 assert.deepEqual(leerLineasRobots("facebook abc\nbasura\ntiktok def https://tiktok.com/tag/bugavalle\nfacebook"), [
-  { red: "facebook", id: "abc", url: undefined },
-  { red: "tiktok", id: "def", url: "https://tiktok.com/tag/bugavalle" },
+  { red: "facebook", id: "abc", url: undefined, perfil: false },
+  { red: "tiktok", id: "def", url: "https://tiktok.com/tag/bugavalle", perfil: false },
 ]);
+assert.equal(leerLineasRobots("facebook abc perfil")[0].perfil, true);
+assert.deepEqual(leerCompetidores("Ana Pérez | https://www.facebook.com/ana\nLuis\n | sin nombre\nRosa | basura"), [
+  { nombre: "Ana Pérez", url: "https://www.facebook.com/ana" },
+  { nombre: "Luis", url: undefined },
+  { nombre: "Rosa", url: undefined },
+]);
+
+assert.equal(limpiarEnlace("https://www.facebook.com/reel/1/?__cft__[0]=AZ&__tn__=%2CO"), "https://www.facebook.com/reel/1/");
+assert.equal(limpiarEnlace("https://www.facebook.com/permalink.php?story_fbid=9&id=2&__tn__=x"), "https://www.facebook.com/permalink.php?story_fbid=9&id=2");
+assert.equal(filasAItems({ L: [{ texto: "Corte de agua en el barrio Popular hoy... Ver más" }] }, "facebook", "u")[0].texto, "Corte de agua en el barrio Popular hoy");
+assert.equal(limpiarEnlace("https://www.instagram.com/p/ABC/?igsh=xyz&utm_source=qr"), "https://www.instagram.com/p/ABC/");
+assert.equal(enlaceVerificable("https://x.co/a#abc"), null);
+assert.equal(enlaceVerificable("https://x.co/a"), "https://x.co/a");
+// Google Noticias: la descripción es «titular + medio»; se usa el titular y no quedan entidades dobles.
+const [g] = parsearFeed("<rss><item><title>Choque en la vía - El Tiempo</title><link>https://n.google.com/a</link><description>&lt;a&gt;Choque en la vía&lt;/a&gt;&amp;nbsp;&amp;nbsp;El Tiempo</description></item></rss>", "noticias");
+assert.equal(g.texto, "Choque en la vía - El Tiempo");
+assert.equal(parsearFeed("<rss><item><title>t</title><description>A&amp;nbsp;B</description></item></rss>", "rss")[0].texto, "A B");
+assert.equal(urlsNoticias("Buga", "Valle del Cauca", ["aseo basuras", "tema nuevo"]).length, 1 + 9 + 1); // sin repetir temas
+const nota = `<html><nav><p>${"menú ".repeat(30)}</p></nav><p>${"El Concejo debatió el contrato del aseo. ".repeat(3)}</p><p>${"La empresa nueva asumirá el servicio desde enero. ".repeat(3)}</p></html>`;
+assert.ok(cuerpoDeNota(nota).includes("asumirá el servicio") && !cuerpoDeNota(nota).includes("menú"));
+assert.equal(cuerpoDeNota('<meta property="og:description" content="Resumen de la nota"><p>corto</p>'), "Resumen de la nota");
 
 console.log("verificación OK");

@@ -3,7 +3,9 @@ import { generarJSON } from "./ai";
 import { leerSecretos } from "./cuenta";
 import { cuentas, db, items } from "./db";
 import { leerLineasRobots, leerRobot } from "./browseai";
-import { buscarEnX, ItemNuevo, leerFeed, urlGoogleNoticias } from "./fuentes";
+import { leerCompetidores, tareasCompetencia } from "./competencia";
+import { completarNoticias } from "./noticias";
+import { buscarEnX, ItemNuevo, leerFeed, urlsNoticias } from "./fuentes";
 
 export const TEMAS = [
   "seguridad", "movilidad y vías", "servicios públicos", "salud", "educación", "empleo y economía",
@@ -24,17 +26,23 @@ export async function guardarItems(cuentaId: number, nuevos: ItemNuevo[]): Promi
   return r.length;
 }
 
+const lineas = (t?: string) => (t ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
+
 /** Recolecta de todas las fuentes configuradas. Una fuente caída no detiene a las demás. */
 export async function recolectar(c: Cuenta) {
   const k = await leerSecretos(c.id);
   const feeds = (c.ajustes.fuentesRss ?? "").split(/\s+/).filter((u) => /^https?:\/\//.test(u) && URL.canParse(u));
   const tareas: [string, Promise<ItemNuevo[]>][] = [
-    ["Google Noticias", leerFeed(urlGoogleNoticias(c.municipio, c.departamento), "noticias")],
+    ...urlsNoticias(c.municipio, c.departamento, lineas(c.ajustes.temasCalientes)).map(
+      (u, i) => [i ? `Google Noticias ${i}` : "Google Noticias", leerFeed(u, "noticias")] as [string, Promise<ItemNuevo[]>],
+    ),
     ...feeds.map((u) => [new URL(u).hostname, leerFeed(u)] as [string, Promise<ItemNuevo[]>]),
   ];
   if (k.xai_api_key) tareas.push(["X (Grok)", buscarEnX(k.xai_api_key, c.municipio, c.departamento)]);
+  const robots = leerLineasRobots(c.ajustes.robotsRedes);
+  tareas.push(...tareasCompetencia(leerCompetidores(c.ajustes.competidores), robots, k.browseai_api_key, c.municipio));
   if (k.browseai_api_key) {
-    for (const r of leerLineasRobots(c.ajustes.robotsRedes)) {
+    for (const r of robots.filter((r) => !r.perfil)) {
       tareas.push([`${r.red} (Browse AI ${r.id.slice(-4)})`, leerRobot(k.browseai_api_key, r.red, r.id, r.url)]);
     }
   }
@@ -83,13 +91,13 @@ export async function clasificar(c: Cuenta, maximo = 200) {
         `Clasificas menciones para entender qué le preocupa a la gente. Eres preciso y neutral.`,
       prompt:
         `Para cada mención devuelve:\n` +
-        `- relevancia: 0 si no trata de ${c.municipio}; 1 poco; 2 relevante; 3 muy relevante para la vida local.\n` +
+        `- relevancia: 0 si no trata de ${c.municipio} O SI ES PUBLICIDAD (la pieza misma vende o promociona: ofertas, precios, hoteles, fincas, eventos de pago, clasificados, mensajes genéricos de viaje; una noticia que informa sobre un cambio de servicio público, una obra o una decisión NO es publicidad aunque mencione descuentos o tarifas); 1 poco; 2 relevante; 3 muy relevante para la vida local.\n` +
         `- tema: uno de ${TEMAS.join(", ")}.\n` +
         `- comuna: barrio, comuna o corregimiento mencionado (prioriza: ${barrios.join(", ") || "cualquiera"}), o null.\n` +
         `- sentimiento: negativo, neutro o positivo.\n` +
         `- emocion: la emoción que moviliza (indignación, miedo, tristeza, esperanza, orgullo, alegría, cansancio, otra).\n` +
         `- resumen: una línea en español, SIN nombres de personas particulares (sí de entidades o cargos públicos).\n\n` +
-        `Menciones:\n${lote.map((x) => `[${x.id}] (${x.fuente}) ${x.titulo ? x.titulo + " — " : ""}${x.texto.slice(0, 600)}`).join("\n")}`,
+        `Menciones:\n${lote.map((x) => `[${x.id}] (${x.fuente}) ${x.titulo ? x.titulo + " — " : ""}${x.texto.slice(0, 800)}`).join("\n")}`,
       esquemaHint: `{"items":[{"id":1,"relevancia":2,"tema":"seguridad","comuna":null,"sentimiento":"negativo","emocion":"miedo","resumen":"..."}]}`,
       temperatura: 0.1,
     });
@@ -131,12 +139,13 @@ export async function guardarClasificacion(
 
 export async function escuchar(c: Cuenta) {
   const recoleccion = await recolectar(c);
+  const notasCompletas = await completarNoticias(c.id).catch(() => 0);
   // Lo recolectado ya quedó guardado; si la IA falla se clasifica en la próxima ronda.
   const clasificacion = await clasificar(c).catch((e: Error) => ({
     clasificados: 0,
     pendientes: -1,
     errorClasificacion: e.message.slice(0, 200),
   }));
-  return { ...recoleccion, ...clasificacion };
+  return { ...recoleccion, notasCompletas, ...clasificacion };
 }
 

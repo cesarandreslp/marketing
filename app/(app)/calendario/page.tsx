@@ -85,6 +85,7 @@ export default async function Calendario({ searchParams }: { searchParams: Promi
                       </div>
                       <p className="mt-0.5">{RED[p.red] ?? p.red} · {FORMATO[p.formato] ?? p.formato}</p>
                       {p.concepto && <p className="mt-0.5 line-clamp-2 text-suave">{p.concepto}</p>}
+                      {p.fuentes.length > 0 && <p className="mt-0.5 text-suave">📰 {p.fuentes.length} {p.fuentes.length === 1 ? "fuente" : "fuentes"}</p>}
                     </Link>
                   </li>
                 ))}

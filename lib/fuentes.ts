@@ -16,17 +16,21 @@ const ENTIDADES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"
 
 const sinEtiquetas = (s: string) => s.replace(/<[^>]+>/g, " ");
 
-function limpiar(s: string): string {
-  const decodificado = sinEtiquetas(s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")).replace(
-    /&(#x?[0-9a-f]+|\w+);/gi,
-    (m, e: string) =>
-      e[0] === "#"
-        ? String.fromCodePoint(parseInt(e.slice(e[1] === "x" ? 2 : 1), e[1] === "x" ? 16 : 10))
-        : (ENTIDADES[e.toLowerCase()] ?? m),
+const decodificar = (s: string) =>
+  s.replace(/&(#x?[0-9a-f]+|\w+);/gi, (m, e: string) =>
+    e[0] === "#"
+      ? String.fromCodePoint(parseInt(e.slice(e[1] === "x" ? 2 : 1), e[1] === "x" ? 16 : 10))
+      : (ENTIDADES[e.toLowerCase()] ?? m),
   );
-  // Segunda pasada: muchos feeds traen el HTML codificado (&lt;p&gt;).
-  return sinEtiquetas(decodificado).replace(/\s+/g, " ").trim();
+
+export function limpiar(s: string): string {
+  const sinCdata = sinEtiquetas(s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1"));
+  // Segunda pasada: muchos feeds traen el HTML codificado (&lt;p&gt;) o doble codificado (&amp;nbsp;).
+  return decodificar(sinEtiquetas(decodificar(sinCdata))).replace(/\s+/g, " ").trim();
 }
+
+/** Un enlace sirve para verificar solo si apunta a la publicación; los que llevan «#» son identificadores internos. */
+export const enlaceVerificable = (u: string | null) => (u && !u.includes("#") ? u : null);
 
 const etiqueta = (bloque: string, ...nombres: string[]) => {
   for (const n of nombres) {
@@ -45,7 +49,8 @@ export function parsearFeed(xml: string, fuente: string): ItemNuevo[] {
   return bloques.flatMap((b) => {
     const titulo = limpiar(etiqueta(b, "title") ?? "");
     const url = limpiar(etiqueta(b, "link") ?? "") || b.match(/<link[^>]*href="([^"]+)"/i)?.[1] || null;
-    const texto = limpiar(etiqueta(b, "description", "summary", "content") ?? "") || titulo;
+    // Google Noticias solo trae «titular + medio» en la descripción: se usa el titular y luego se completa con la nota.
+    const texto = (fuente === "noticias" ? titulo : limpiar(etiqueta(b, "description", "summary", "content") ?? "")) || titulo;
     const fecha = limpiar(etiqueta(b, "pubDate", "published", "updated", "dc:date") ?? "");
     if (!texto) return [];
     const d = fecha ? new Date(fecha) : null;
@@ -71,6 +76,20 @@ export function nombresMunicipio(municipio: string): string[] {
 export function urlGoogleNoticias(municipio: string, departamento: string): string {
   const q = `(${nombresMunicipio(municipio).map((n) => `"${n}"`).join(" OR ")}) ${departamento} when:2d`;
   return `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=es-419&gl=CO&ceid=CO:es-419`;
+}
+
+export const urlGoogle = (q: string) => `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=es-419&gl=CO&ceid=CO:es-419`;
+
+const TEMAS_BASE = ["aseo basuras", "Concejo", "Alcaldía contratos", "seguridad", "servicios públicos agua energía", "salud hospital", "movilidad vías", "empleo", "obras"];
+
+/** Búsquedas de noticias: el municipio en general y, aparte, cada tema (base + los del usuario). Sin repetir. */
+export function urlsNoticias(municipio: string, departamento: string, temas: string[] = []): string[] {
+  const m = `(${nombresMunicipio(municipio).map((n) => `"${n}"`).join(" OR ")})`;
+  const q = urlGoogle;
+  return [
+    urlGoogleNoticias(municipio, departamento),
+    ...[...new Set([...TEMAS_BASE, ...temas])].map((t) => q(`${m} ${t} when:7d`)),
+  ];
 }
 
 /**

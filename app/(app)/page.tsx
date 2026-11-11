@@ -5,12 +5,12 @@ import { publicacionHabilitada } from "@/lib/cumplimiento";
 import { estadoSecretos } from "@/lib/cuenta";
 import { proximoLunes } from "@/lib/estratega";
 import { VERSION_FLUJOS } from "@/lib/n8n-flujos";
+import { agrupar, KITS, type Kit, type Pieza } from "@/lib/semana";
 import { requerirSesion } from "@/lib/sesion";
 import { AccionesPieza, AprobarSemana, Copiar, GenerarSemana, MarcarPublicada, SubirMedio } from "./pieza-ui";
 
 export const dynamic = "force-dynamic";
 
-type Pieza = typeof piezas.$inferSelect;
 
 const ESTILO_ESTADO: Record<(typeof ESTADOS)[number], string> = {
   borrador: "bg-fondo text-suave",
@@ -26,14 +26,6 @@ const cuando = (d: Date) =>
   d.toLocaleString("es-CO", { timeZone: "America/Bogota", weekday: "long", day: "numeric", hour: "numeric", minute: "2-digit" });
 const diaLargo = (s: string) =>
   new Date(`${s}T12:00:00`).toLocaleDateString("es-CO", { day: "numeric", month: "long" });
-
-/** Agrupa por concepto (un video = varias redes) y oculta las versiones rechazadas que ya se rehicieron. */
-function agrupar(ps: Pieza[]) {
-  const rehechas = new Set(ps.map((p) => p.reemplazaA).filter(Boolean));
-  const visibles = ps.filter((p) => !rehechas.has(p.id));
-  const grupos = Map.groupBy(visibles, (p) => `${p.formato}·${p.concepto ?? p.id}`);
-  return [...grupos.values()].sort((a, b) => +a[0].fechaProgramada - +b[0].fechaProgramada);
-}
 
 function Concepto({ ps }: { ps: Pieza[] }) {
   const p = ps[0];
@@ -59,7 +51,7 @@ function Concepto({ ps }: { ps: Pieza[] }) {
           <div className="mt-2"><Copiar texto={guion} /></div>
         </details>
       )}
-      {prompt && (
+      {prompt && p.formato !== "video" && (
         <details className="rounded-lg bg-fondo p-3 text-sm">
           <summary className="cursor-pointer font-medium">Prompt de imagen (Gemini / Nano Banana)</summary>
           <p className="mt-2 whitespace-pre-wrap text-suave">{prompt}</p>
@@ -219,6 +211,10 @@ export default async function Bandeja() {
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                <a href={`/api/semana/${semana}/pdf?para=todos`} download className="btn btn-primario" title="Los tres PDF juntos en un ZIP">Descargar los 3 PDF</a>
+                {(Object.entries(KITS) as [Kit, (typeof KITS)[Kit]][]).map(([k, v]) => (
+                  <a key={k} href={`/api/semana/${semana}/pdf?para=${k}`} download className="btn" title={v.para}>PDF · {v.boton}</a>
+                ))}
                 {semana === siguiente && hayIA && borradores.length > 0 && (
                   <GenerarSemana semana={semana} texto="Rehacer borradores" confirmar="Se reemplazarán los borradores de esta semana (lo aprobado se conserva). ¿Continuar?" />
                 )}

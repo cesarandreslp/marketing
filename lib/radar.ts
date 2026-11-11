@@ -21,7 +21,7 @@ export async function radar(cuentaId: number, limite = 10): Promise<FilaRadar[]>
     with m as (
       select tema, comuna, emocion, sentimiento, relevancia, coalesce(publicado_en, creado_en) as f
       from items
-      where cuenta_id = ${cuentaId} and relevancia >= 1 and tema is not null
+      where cuenta_id = ${cuentaId} and relevancia >= 1 and tema is not null and fuente <> 'competencia'
         and coalesce(publicado_en, creado_en) >= now() - interval '14 days'
     )
     select tema,
