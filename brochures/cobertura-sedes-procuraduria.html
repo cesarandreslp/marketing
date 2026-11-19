@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Cobertura de sedes · Procuraduría</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--ink:#13241C;--muted:#56665E;--line:#D6DFD9;--green:#0D5C3D;--soft:#E4F0E9;--gold:#A97A1F;--paper:#FFFFFF;
+  --f-display:"Source Serif 4",Georgia,serif;--f-body:"Public Sans","Segoe UI",sans-serif;--f-mono:"IBM Plex Mono",Menlo,monospace}
+@page{size:A4;margin:16mm 15mm 16mm}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;font-family:var(--f-body);color:var(--ink);background:var(--paper);font-size:9.6pt;line-height:1.5}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;margin:0;line-height:1.2}
+h1{font-size:23pt}
+h2{font-size:14pt;margin-bottom:6px;display:flex;align-items:baseline;gap:10px}
+h2 .count{font-family:var(--f-mono);font-size:9pt;font-weight:500;color:var(--green);background:var(--soft);padding:2px 8px;border-radius:3px}
+p{margin:0}
+.eyebrow{font-size:7.5pt;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--green)}
+.muted{color:var(--muted)}
+.head{border-top:5px solid var(--green);padding-top:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.brand{font-family:var(--f-display);font-weight:700;font-size:12pt}
+.brand small{display:block;font-family:var(--f-body);font-weight:500;font-size:7.5pt;color:var(--muted)}
+.by{text-align:right;border-left:1px solid var(--line);padding-left:14px}
+.by span{display:block;font-size:7pt;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.by b{font-family:var(--f-display);font-size:11pt;font-weight:600}
+.title{margin:22px 0 8px;display:flex;flex-direction:column;gap:8px}
+.lead{font-size:10.5pt;color:var(--muted);max-width:62ch}
+section{margin-top:20px;break-inside:avoid}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:7pt;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:1.5px solid var(--ink)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.scen td:first-child{font-weight:600}
+.scen tr.rec td{background:var(--soft)}
+.scen .big{font-family:var(--f-display);font-size:13pt;font-weight:700;color:var(--green)}
+.tag{font-size:7pt;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-left:6px}
+.note{font-size:8.4pt;color:var(--muted);border-left:3px solid var(--gold);padding:3px 0 3px 10px;margin-top:10px}
+.reg{columns:2;column-gap:22px}
+.reg table{break-inside:avoid}
+.reg td:first-child{width:26px;font-family:var(--f-mono);font-size:8pt;color:var(--muted)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{border:1px solid var(--line);border-radius:4px;padding:10px 12px}
+.card h3{font-size:10.5pt;margin-bottom:3px}
+.prov{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
+.prov div{padding:6px 0;border-bottom:1px solid var(--line);break-inside:avoid}
+.prov b{font-family:var(--f-display);font-weight:600;font-size:10pt;display:block}
+.prov span{font-size:9pt}
+.reco{background:var(--green);color:#fff;border-radius:4px;padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.reco h3{font-size:11.5pt}
+.reco p{font-size:9pt;opacity:.92}
+.reco .eyebrow{color:#fff;opacity:.8}
+ol.src{margin:6px 0 0;padding-left:18px;font-size:8pt;color:var(--muted)}
+ol.src li{margin-bottom:3px}
+.url{font-family:var(--f-mono);font-size:7pt;word-break:break-all}
+.page-break{break-before:page}
+footer{margin-top:18px;padding-top:8px;border-top:1px solid var(--line);font-size:7.5pt;color:var(--muted);display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="brand">Ventanilla Única<small>Gestión de PQRSD para entidades públicas</small></div>
+  <div class="by"><span>Presenta</span><b>Global BPO S.A.S.</b></div>
+</div>
+
+<div class="title">
+  <span class="eyebrow">Anexo de cobertura · Procuraduría General de la Nación</span>
+  <h1>¿En cuántas sedes se puede implementar Ventanilla Única?</h1>
+  <p class="lead">En Ventanilla Única, una sede es un portal propio con su subdominio, su equipo, su IA y su director. La Procuraduría tiene un nivel central y oficinas territoriales en todo el país. Según hasta dónde se quiera llegar, la implementación va de 33 a cerca de 90 sedes.</p>
+</div>
+
+<section>
+  <h2>Escenarios de implementación</h2>
+  <table class="scen">
+    <thead><tr><th>Escenario</th><th>Qué incluye</th><th class="num">Sedes</th></tr></thead>
+    <tbody>
+      <tr class="rec"><td>A. Por departamento <span class="tag">Fase 1 recomendada</span></td><td>Nivel central y las 32 procuradurías regionales</td><td class="num big">33</td></tr>
+      <tr><td>B. A más Bogotá</td><td>Escenario A y las 2 procuradurías distritales</td><td class="num big">35</td></tr>
+      <tr><td>C. Cobertura completa</td><td>Escenario B y las 51 a 55 procuradurías provinciales</td><td class="num big">86–90</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Las fuentes no coinciden en el número de provinciales: la Procuraduría informa 51 en su guía de preguntas frecuentes y 55 en su organigrama de agosto de 2023. Desde el Decreto 1851 de 2021 cada regional y provincial se divide en una oficina de instrucción y otra de juzgamiento. Para atender PQRSD se propone una sede por ciudad, no por tipo de oficina, para no duplicar portales que el ciudadano no distingue.</p>
+</section>
+
+<section>
+  <h2>1. Nivel central y procuradurías distritales <span class="count">1 + 2</span></h2>
+  <div class="cards">
+    <div class="card"><h3>Nivel central · Bogotá</h3><p class="muted">Portal principal de la entidad. Opera sus propios casos y tiene el panel de supervisión con las cifras de cada sede.</p></div>
+    <div class="card"><h3>Procuradurías distritales · Bogotá</h3><p class="muted">Procuraduría Primera Distrital y Procuraduría Segunda Distrital. Cada una puede tener su propia sede.</p></div>
+  </div>
+</section>
+
+<section class="page-break">
+  <h2>2. Procuradurías regionales <span class="count">32</span></h2>
+  <p class="muted" style="margin-bottom:8px">Una por departamento, con sede en su capital.</p>
+  <div class="reg">
+    <table>
+      <thead><tr><th>#</th><th>Regional</th><th>Sede</th></tr></thead>
+      <tbody>
+        <tr><td>01</td><td>Amazonas</td><td>Leticia</td></tr>
+        <tr><td>02</td><td>Antioquia</td><td>Medellín</td></tr>
+        <tr><td>03</td><td>Arauca</td><td>Arauca</td></tr>
+        <tr><td>04</td><td>Atlántico</td><td>Barranquilla</td></tr>
+        <tr><td>05</td><td>Bolívar</td><td>Cartagena</td></tr>
+        <tr><td>06</td><td>Boyacá</td><td>Tunja</td></tr>
+        <tr><td>07</td><td>Caldas</td><td>Manizales</td></tr>
+        <tr><td>08</td><td>Caquetá</td><td>Florencia</td></tr>
+        <tr><td>09</td><td>Casanare</td><td>Yopal</td></tr>
+        <tr><td>10</td><td>Cauca</td><td>Popayán</td></tr>
+        <tr><td>11</td><td>Cesar</td><td>Valledupar</td></tr>
+        <tr><td>12</td><td>Chocó</td><td>Quibdó</td></tr>
+        <tr><td>13</td><td>Córdoba</td><td>Montería</td></tr>
+        <tr><td>14</td><td>Cundinamarca</td><td>Bogotá</td></tr>
+        <tr><td>15</td><td>Guainía</td><td>Inírida</td></tr>
+        <tr><td>16</td><td>Guaviare</td><td>San José del Guaviare</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <thead><tr><th>#</th><th>Regional</th><th>Sede</th></tr></thead>
+      <tbody>
+        <tr><td>17</td><td>Huila</td><td>Neiva</td></tr>
+        <tr><td>18</td><td>La Guajira</td><td>Riohacha</td></tr>
+        <tr><td>19</td><td>Magdalena</td><td>Santa Marta</td></tr>
+        <tr><td>20</td><td>Meta</td><td>Villavicencio</td></tr>
+        <tr><td>21</td><td>Nariño</td><td>Pasto</td></tr>
+        <tr><td>22</td><td>Norte de Santander</td><td>Cúcuta</td></tr>
+        <tr><td>23</td><td>Putumayo</td><td>Mocoa</td></tr>
+        <tr><td>24</td><td>Quindío</td><td>Armenia</td></tr>
+        <tr><td>25</td><td>Risaralda</td><td>Pereira</td></tr>
+        <tr><td>26</td><td>San Andrés</td><td>San Andrés</td></tr>
+        <tr><td>27</td><td>Santander</td><td>Bucaramanga</td></tr>
+        <tr><td>28</td><td>Sucre</td><td>Sincelejo</td></tr>
+        <tr><td>29</td><td>Tolima</td><td>Ibagué</td></tr>
+        <tr><td>30</td><td>Valle del Cauca</td><td>Cali</td></tr>
+        <tr><td>31</td><td>Vaupés</td><td>Mitú</td></tr>
+        <tr><td>32</td><td>Vichada</td><td>Puerto Carreño</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Listado construido a partir de la regla de una regional por departamento que informa la Procuraduría. Conviene validarlo contra el directorio oficial vigente.</p>
+</section>
+
+<section>
+  <h2>3. Procuradurías provinciales <span class="count">51–55 · listado parcial</span></h2>
+  <p class="muted" style="margin-bottom:8px">Sedes provinciales identificadas en las resoluciones de competencia territorial consultadas, agrupadas por departamento.</p>
+  <div class="prov">
+    <div><b>Antioquia</b><span>Valle de Aburrá, Amagá, Andes, Apartadó, Puerto Berrío, Rionegro, Santa Fe de Antioquia, Yarumal</span></div>
+    <div><b>Cundinamarca</b><span>Facatativá, Fusagasugá, Girardot, Zipaquirá</span></div>
+    <div><b>Tolima</b><span>Ibagué, Chaparral, Honda</span></div>
+    <div><b>Norte de Santander</b><span>Cúcuta, Ocaña</span></div>
+    <div><b>Nariño</b><span>Ipiales, Tumaco</span></div>
+    <div><b>Cesar</b><span>Valledupar, San Juan del Cesar (creada en 2025)</span></div>
+    <div><b>Santander</b><span>Barrancabermeja</span></div>
+    <div><b>Valle del Cauca</b><span>Buga</span></div>
+    <div><b>Huila</b><span>Garzón</span></div>
+    <div><b>Otras sedes</b><span>Cartagena, Montería, Armenia, Villavicencio</span></div>
+  </div>
+  <p class="note">Son unas 26 de las 51 a 55 provinciales. El listado completo y vigente está en la Resolución 414 de 2023 de la Procuraduría y sus modificaciones de 2023, 2024 y 2025. Este anexo se completará con esa fuente.</p>
+</section>
+
+<section>
+  <div class="reco">
+    <div>
+      <span class="eyebrow">Fase 1</span>
+      <h3>33 sedes: nivel central y 32 regionales</h3>
+      <p>Cubre todo el país desde el primer día. El nivel central supervisa las cifras de cada regional sin abrir sus expedientes.</p>
+    </div>
+    <div>
+      <span class="eyebrow">Fase 2</span>
+      <h3>Distritales y provinciales, según prioridad</h3>
+      <p>Cada sede nueva se da de alta en minutos: dominio, administrador y credenciales. Se puede crecer por departamento o por volumen de casos.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Fuentes</h2>
+  <ol class="src">
+    <li>Procuraduría General de la Nación, Preguntas frecuentes al ciudadano. <span class="url">procuraduria.gov.co/portal/media/docs/PREGUNTASFRECUENTES1.pdf</span></li>
+    <li>Procuraduría General de la Nación, Organigrama, agosto de 2023. <span class="url">procuraduria.gov.co/Documents/Agosto de 2023/Organigrama_F-Procuraduría General de la Nación..pdf</span></li>
+    <li>Resolución 414 de 2023, distribución de competencias de las procuradurías territoriales. <span class="url">apps.procuraduria.gov.co/relatoria/media/file/flas_juridico/4144_RESOLUCION 414 DE 12 DE OCTUBRE DE 2023.pdf</span></li>
+    <li>Resolución 213 de 2003, mapa territorial de competencias. <span class="url">apps.procuraduria.gov.co/gp/gp/docs/r_pgn_0213_2003.htm</span></li>
+    <li>Resolución 018 de 2000, compilación JEP. <span class="url">jurinfo.jep.gov.co/normograma/compilacion/docs/resolucion_procuraduria_rp001800.htm</span></li>
+    <li>Decreto 1851 de 2021, Gestor Normativo de Función Pública. <span class="url">funcionpublica.gov.co/eva/gestornormativo/norma.php?i=175150</span></li>
+    <li>Decreto 262 de 2000, versión 2025, Procuraduría. <span class="url">apps.procuraduria.gov.co/relatoria/media/file/Decreto-262-2025.pdf</span></li>
+  </ol>
+</section>
+
+<footer><span>Ventanilla Única · Global BPO S.A.S.</span><span>Noviembre de 2026</span></footer>
+
+</body>
+</html>

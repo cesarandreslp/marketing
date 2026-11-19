@@ -1,0 +1,420 @@
+<title>Ventanilla Única · Procuraduría</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: folleto institucional en paneles apilados; cada panel es una cara del brochure (A4 al exportar). */
+:root{
+  --paper:#FAFBF9; --panel:#FFFFFF; --ink:#13241C; --muted:#56665E; --line:#D6DFD9;
+  --green:#0D5C3D; --green-ink:#FFFFFF; --green-soft:#E4F0E9; --gold:#A97A1F;
+  --ok:#2F8A57; --warn:#C99400; --bad:#C0392B; --bad-soft:#F8E4E1;
+  --f-display:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-body:"Public Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0E1612; --panel:#14201A; --ink:#E5EEE8; --muted:#9CADA4; --line:#2A3B33;
+  --green:#5DC097; --green-ink:#0B1A13; --green-soft:#183026; --gold:#D9AE57;
+  --ok:#52B97F; --warn:#E3B53A; --bad:#E5675A; --bad-soft:#3A1F1C; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#0E1612; --panel:#14201A; --ink:#E5EEE8; --muted:#9CADA4; --line:#2A3B33;
+  --green:#5DC097; --green-ink:#0B1A13; --green-soft:#183026; --gold:#D9AE57;
+  --ok:#52B97F; --warn:#E3B53A; --bad:#E5675A; --bad-soft:#3A1F1C; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 56px}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15;font-weight:600}
+h1{font-size:clamp(2rem,4.6vw,3.25rem);letter-spacing:-.01em}
+h2{font-size:clamp(1.55rem,3vw,2.1rem)}
+h3{font-size:1.15rem}
+p{margin:0}
+.eyebrow{font-size:.74rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--green)}
+.mono{font-family:var(--f-mono);font-size:.82em}
+.lead{font-size:1.12rem;color:var(--muted);max-width:60ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:clamp(24px,4.5vw,52px);display:flex;flex-direction:column;gap:28px}
+.panel-head{display:flex;flex-direction:column;gap:10px;max-width:68ch}
+.panel-head p{color:var(--muted)}
+
+/* Portada */
+.cover{border-top:6px solid var(--green);display:grid;grid-template-columns:1.25fr 1fr;gap:clamp(24px,4vw,56px);align-items:center}
+.cover > *{min-width:0}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+.brand-mark{width:40px;height:40px;border-radius:4px;background:var(--green);display:grid;place-items:center}
+.brand-mark svg{width:24px;height:24px}
+.brand-name{font-family:var(--f-display);font-weight:700;font-size:1.25rem;line-height:1.1}
+.presenter{margin-left:auto;padding-left:16px;border-left:1px solid var(--line);display:flex;flex-direction:column;line-height:1.2}
+.presenter span{font-size:.68rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.presenter b{font-family:var(--f-display);font-weight:600;font-size:1.05rem}
+.cta-by{display:flex;flex-direction:column;gap:4px}
+.cta-by small{font-size:.85rem;opacity:.85}
+.brand-name small{display:block;font-family:var(--f-body);font-weight:500;font-size:.74rem;color:var(--muted);letter-spacing:.04em}
+.cover-copy{display:flex;flex-direction:column;gap:18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.chip{font-size:.8rem;font-weight:500;padding:5px 11px;border-radius:999px;background:var(--green-soft);color:var(--ink)}
+
+.ticket{border:1px solid var(--line);border-radius:6px;background:var(--paper);font-family:var(--f-mono);font-size:.84rem;overflow:hidden}
+.ticket-top{background:var(--green);color:var(--green-ink);padding:14px 18px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.ticket-top b{font-size:1.05rem;font-weight:500;letter-spacing:.02em}
+.ticket dl{margin:0;padding:6px 18px 4px;display:grid;grid-template-columns:auto 1fr;column-gap:16px}
+.ticket dt,.ticket dd{padding:9px 0;border-bottom:1px dashed var(--line);margin:0}
+.ticket dt{color:var(--muted)}
+.ticket dd{text-align:right;font-variant-numeric:tabular-nums}
+.ticket dl > :nth-last-child(-n+2){border-bottom:0}
+.light{display:inline-flex;align-items:center;gap:7px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;background:var(--ok)}
+.ticket-foot{padding:10px 18px 14px;font-family:var(--f-body);font-size:.74rem;color:var(--muted)}
+
+/* Recorrido */
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;counter-reset:s}
+.step{position:relative;padding:0 18px 0 0;display:flex;flex-direction:column;gap:10px}
+.step::before{counter-increment:s;content:counter(s);font-family:var(--f-display);font-weight:600;font-size:1.05rem;
+  width:38px;height:38px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--green);color:var(--green);background:var(--panel);position:relative;z-index:1}
+.step::after{content:"";position:absolute;top:19px;left:38px;right:0;height:2px;background:var(--line)}
+.step:last-child::after{display:none}
+.step h3{font-size:1.05rem}
+.step p{font-size:.9rem;color:var(--muted)}
+.step .who{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+
+/* Reloj legal */
+.clock{display:grid;grid-template-columns:1fr 1.15fr;gap:clamp(24px,4vw,48px);align-items:start}
+.clock > *{min-width:0}
+.clock-copy{display:flex;flex-direction:column;gap:16px}
+.plazos{width:100%;border-collapse:collapse;font-size:.9rem}
+.plazos th,.plazos td{text-align:left;padding:9px 0;border-bottom:1px solid var(--line)}
+.plazos th{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.plazos td:last-child,.plazos th:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.note{font-size:.78rem;color:var(--muted)}
+.semaforo{display:flex;flex-direction:column;gap:8px}
+.sem{display:flex;gap:12px;align-items:baseline;font-size:.92rem}
+.sem .dot{flex:none;transform:translateY(1px)}
+
+.cal{border:1px solid var(--line);border-radius:6px;padding:18px;background:var(--paper)}
+.cal-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.cal-head h3{font-size:1.05rem}
+.grid7{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.dow{font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center;padding-bottom:4px}
+.day{aspect-ratio:1/1;max-width:100%;border-radius:4px;border:1px solid var(--line);background:var(--panel);position:relative;padding:4px 5px;font-variant-numeric:tabular-nums;font-size:.8rem;display:flex;flex-direction:column;justify-content:space-between}
+.day.empty{border:0;background:transparent}
+.day.weekend{background:transparent;color:var(--muted)}
+.day .n{font-family:var(--f-mono);font-size:.68rem;font-weight:500;align-self:flex-end;padding:1px 5px;border-radius:3px;color:#fff}
+.day.c-ok .n{background:var(--ok)} .day.c-warn .n{background:var(--warn)} .day.c-bad .n{background:var(--bad)}
+:root .day .n{color:var(--panel)}
+.day.fest{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.day.fest::after{content:"festivo";position:absolute;left:5px;bottom:4px;font-size:.58rem;font-weight:600;letter-spacing:.04em}
+.day.rad{border:2px solid var(--green)}
+.day.rad::after{content:"radica";position:absolute;left:5px;bottom:4px;font-size:.58rem;font-weight:600;color:var(--green)}
+.day.due{outline:2px solid var(--bad);outline-offset:1px}
+.cal-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;font-size:.78rem;color:var(--muted)}
+.cal-legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid var(--line)}
+.callout{border-left:3px solid var(--gold);padding:4px 0 4px 14px;font-size:.92rem}
+
+/* Multi-sede */
+.sedes{display:grid;grid-template-columns:1fr 1.1fr;gap:20px;align-items:stretch}
+.sedes > *{min-width:0}
+.central{border:2px solid var(--green);border-radius:6px;padding:22px;display:flex;flex-direction:column;gap:14px}
+.central ul,.supervision ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:.9rem}
+.domain{font-family:var(--f-mono);font-size:.76rem;color:var(--muted);word-break:break-all}
+.supervision{border:1.5px dashed var(--green);border-radius:6px;padding:16px 18px;background:var(--green-soft);display:flex;flex-direction:column;gap:8px}
+.supervision h4{margin:0;font-family:var(--f-display);font-size:1rem;color:var(--green)}
+.regionales{display:flex;flex-direction:column;gap:0}
+.regional{border:1px solid var(--line);border-top:3px solid var(--green);border-radius:6px;padding:14px 18px;display:flex;flex-direction:column;gap:4px;background:var(--panel)}
+.regional .meta{font-size:.82rem;color:var(--muted)}
+.wall{display:flex;align-items:center;gap:10px;padding:8px 0;color:var(--bad);font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.wall::before,.wall::after{content:"";flex:1;border-top:1.5px dashed var(--bad)}
+.flow{font-size:.8rem;color:var(--green);font-weight:600;display:flex;align-items:center;gap:8px}
+.points{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px 28px;margin:0;padding:0;list-style:none}
+.points li{display:flex;flex-direction:column;gap:6px;padding-top:14px;border-top:1px solid var(--line)}
+.points b{font-family:var(--f-display);font-size:1.02rem;font-weight:600}
+.points span{font-size:.9rem;color:var(--muted)}
+.illus{font-size:.74rem;color:var(--muted);font-style:italic}
+
+/* Acceso por dominio */
+.doors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.door{border:1px solid var(--line);border-radius:6px;padding:18px;display:flex;flex-direction:column;gap:10px;background:var(--paper)}
+.door-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.status{font-family:var(--f-mono);font-size:.78rem;padding:3px 9px;border-radius:4px;font-weight:500}
+.status.ok{background:var(--green-soft);color:var(--green)}
+.status.no{background:var(--bad-soft);color:var(--bad)}
+.user{font-size:.86rem}
+.user b{font-weight:600}
+
+/* Cierre */
+.closing{background:var(--green);color:var(--green-ink);border:0}
+.closing .eyebrow{color:var(--green-ink);opacity:.8}
+.closing .lead{color:var(--green-ink);opacity:.88}
+.deliver{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.deliver div{border-top:1px solid color-mix(in srgb,var(--green-ink) 40%,transparent);padding-top:12px;display:flex;flex-direction:column;gap:4px}
+.deliver b{font-family:var(--f-display);font-size:1.05rem;font-weight:600}
+.deliver span{font-size:.88rem;opacity:.88}
+.cta{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border-top:1px solid color-mix(in srgb,var(--green-ink) 40%,transparent);padding-top:22px}
+.cta p{font-family:var(--f-display);font-size:1.3rem;font-weight:600}
+.cta .mono{font-size:.95rem;padding:8px 14px;border:1px solid color-mix(in srgb,var(--green-ink) 55%,transparent);border-radius:4px;user-select:all}
+
+@media (max-width:900px){
+  .cover,.clock,.sedes{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr;gap:22px}
+  .step{padding:0 0 0 54px}
+  .step::before{position:absolute;left:0;top:-4px}
+  .step::after{top:38px;bottom:-22px;left:18px;right:auto;width:2px;height:auto}
+  .points{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .deliver{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:560px){
+  .points,.deliver,.doors{grid-template-columns:1fr}
+  .day{font-size:.7rem;padding:3px}
+  .day .n{font-size:.6rem;padding:0 3px}
+  .day.fest::after,.day.rad::after{font-size:.5rem;left:3px}
+}
+@media print{
+  @page{size:A4;margin:12mm}
+  body{padding:0;background:#fff}
+  .wrap{gap:0;max-width:none}
+  .panel{break-inside:avoid;border:0;border-radius:0;padding:10mm 4mm}
+  .panel + .panel{break-before:page}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+
+<div class="wrap">
+
+  <!-- Portada -->
+  <section class="panel cover" aria-labelledby="t-cover">
+    <div class="cover-copy">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--green-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
+        </div>
+        <div class="brand-name">Ventanilla Única<small>Gestión de PQRSD para entidades públicas</small></div>
+        <div class="presenter"><span>Presenta</span><b>Global BPO S.A.S.</b></div>
+      </div>
+      <span class="eyebrow">Propuesta para la Procuraduría General de la Nación</span>
+      <h1 id="t-cover">Cada PQRSD con su responsable asignado y su plazo legal a la vista.</h1>
+      <p class="lead">Un entorno propio para la Procuraduría, con base de datos independiente y su dominio. El ciudadano radica en minutos, la IA entrega el caso al funcionario indicado y el sistema lleva la cuenta de los días hábiles, en el nivel central y en cada regional.</p>
+      <div class="chips">
+        <span class="chip">Radicado inmediato</span>
+        <span class="chip">Asignación con IA</span>
+        <span class="chip">Días hábiles y festivos de Colombia</span>
+        <span class="chip">Una sede por regional</span>
+      </div>
+    </div>
+    <aside class="ticket" aria-label="Ejemplo de radicado">
+      <div class="ticket-top"><span>Radicado</span><b>PQRSD-2026-004817</b></div>
+      <dl>
+        <dt>Radicado el</dt><dd>mar 3 nov 2026 · 09:14</dd>
+        <dt>Canal</dt><dd>Portal web</dd>
+        <dt>Tipo</dt><dd>Derecho de petición</dd>
+        <dt>Materia</dt><dd>Derechos humanos</dd>
+        <dt>Asignado a</dt><dd>Funcionario de la materia</dd>
+        <dt>Vence</dt><dd>mié 25 nov 2026</dd>
+        <dt>Estado</dt><dd><span class="light"><span class="dot"></span>En término</span></dd>
+      </dl>
+      <p class="ticket-foot">Ejemplo ilustrativo. El ciudadano recibe este número en pantalla y en su correo, sin crear cuenta.</p>
+    </aside>
+  </section>
+
+  <!-- Recorrido -->
+  <section class="panel" aria-labelledby="t-steps">
+    <div class="panel-head">
+      <span class="eyebrow">El recorrido de un caso</span>
+      <h2 id="t-steps">De la radicación al cierre, en cinco pasos</h2>
+      <p>Todo el expediente vive en un solo lugar. Quien radica en ventanilla presencial entra al mismo expediente que quien lo hace por el portal.</p>
+    </div>
+    <ol class="steps">
+      <li class="step">
+        <span class="who">Ciudadano</span>
+        <h3>Radica</h3>
+        <p>Entra al portal de la entidad o de su sede, llena el formulario y adjunta sus soportes. Sin crear cuenta. El número de radicado sale en el momento.</p>
+      </li>
+      <li class="step">
+        <span class="who">IA</span>
+        <h3>Clasifica y asigna</h3>
+        <p>Lee el escrito y los adjuntos, identifica si es petición, queja o un asunto de derechos humanos, y lo entrega al funcionario de esa materia según disponibilidad y carga. En segundos.</p>
+      </li>
+      <li class="step">
+        <span class="who">Sistema</span>
+        <h3>Arranca el reloj legal</h3>
+        <p>Calcula la fecha de vencimiento según el tipo de solicitud, solo en días hábiles y sin los festivos de Colombia.</p>
+      </li>
+      <li class="step">
+        <span class="who">Funcionario</span>
+        <h3>Gestiona</h3>
+        <p>Ve el caso completo en una pantalla. Pide información, escala a otra dependencia o remite a la entidad competente. La IA le sugiere una respuesta que él revisa.</p>
+      </li>
+      <li class="step">
+        <span class="who">Director</span>
+        <h3>Cierra</h3>
+        <p>Aprueba o rechaza el cierre con motivo y decide si habilita segunda instancia, de 1 a 30 días hábiles. El ciudadano recibe la respuesta por correo.</p>
+      </li>
+    </ol>
+    <p class="callout">Si un funcionario está de vacaciones o incapacitado, se marca y deja de recibir casos. Si la IA no logra decidir con claridad, el caso llega al director para que él lo asigne.</p>
+  </section>
+
+  <!-- Reloj legal -->
+  <section class="panel" aria-labelledby="t-clock">
+    <div class="clock">
+      <div class="clock-copy">
+        <span class="eyebrow">El reloj legal</span>
+        <h2 id="t-clock">Nadie tiene que llevar la cuenta. El caso mismo avisa.</h2>
+        <p>Desde la radicación, el sistema cuenta solo días hábiles y descuenta los festivos de Colombia, incluidos los que se corren al lunes por la Ley Emiliani. Es ahí donde casi todo el mundo se equivoca al contar a mano.</p>
+        <table class="plazos">
+          <thead><tr><th>Tipo de solicitud</th><th>Plazo</th></tr></thead>
+          <tbody>
+            <tr><td>Petición general</td><td>15 días hábiles</td></tr>
+            <tr><td>Documentos e información</td><td>10 días hábiles</td></tr>
+            <tr><td>Consultas</td><td>30 días hábiles</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Términos generales del artículo 14 de la Ley 1437 de 2011, sustituido por la Ley 1755 de 2015. Cada tipo se configura en el sistema.</p>
+        <div class="semaforo" aria-label="Semáforo de plazos">
+          <div class="sem"><span class="dot" style="background:var(--ok)"></span><span><b>Verde</b> mientras hay tiempo de sobra.</span></div>
+          <div class="sem"><span class="dot" style="background:var(--warn)"></span><span><b>Amarillo</b> cuando el plazo se está agotando.</span></div>
+          <div class="sem"><span class="dot" style="background:var(--bad)"></span><span><b>Rojo</b> cuando está por vencerse.</span></div>
+        </div>
+      </div>
+      <div class="cal" aria-labelledby="t-cal">
+        <div class="cal-head">
+          <h3 id="t-cal">Noviembre de 2026</h3>
+          <span class="mono" style="color:var(--muted)">petición · 15 días hábiles</span>
+        </div>
+        <div class="grid7" id="cal" role="img" aria-label="Calendario de noviembre de 2026: radicado el martes 3, festivos el lunes 2 y el lunes 16, vence el miércoles 25."></div>
+        <div class="cal-legend">
+          <span><i class="sw" style="background:var(--ok)"></i>holgado</span>
+          <span><i class="sw" style="background:var(--warn)"></i>se agota</span>
+          <span><i class="sw" style="background:var(--bad)"></i>por vencer</span>
+          <span><i class="sw" style="background:var(--bad-soft);border-color:var(--bad)"></i>festivo</span>
+        </div>
+        <p class="callout" style="margin-top:16px">El 11 de noviembre, Independencia de Cartagena, se corre al lunes 16. Quien no lo descuente cierra el plazo el 24. El sistema marca el <b>miércoles 25</b>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Multi-sede -->
+  <section class="panel" aria-labelledby="t-sedes">
+    <div class="panel-head">
+      <span class="eyebrow">Multi-sede · el diferenciador</span>
+      <h2 id="t-sedes">Un solo entorno para el nivel central y todas las regionales</h2>
+      <p>Una entidad con regionales no necesita una instalación por sede. Cada procuraduría regional opera sus propios casos con su propio equipo, y el nivel central supervisa sin abrir expedientes ajenos.</p>
+    </div>
+    <div class="sedes">
+      <div class="central">
+        <div>
+          <h3>Nivel central · Bogotá</h3>
+          <span class="domain">procuraduria.ventanilla-unica.store</span>
+        </div>
+        <ul>
+          <li>Su propio equipo y sus propios casos</li>
+          <li>Aquí manda la dirección de la entidad</li>
+          <li>Es el portal principal de la entidad</li>
+        </ul>
+        <div class="supervision">
+          <h4>Panel de supervisión</h4>
+          <ul>
+            <li>Cifras de cada regional, en vivo</li>
+            <li>Anotaciones al director de cada una</li>
+            <li>No abre los casos de las regionales</li>
+            <li>Solo lectura</li>
+          </ul>
+        </div>
+        <span class="flow">↑ recibe solo estadísticas, por una única conexión</span>
+      </div>
+      <div class="regionales">
+        <div class="regional">
+          <h3>Procuraduría Regional de Antioquia</h3>
+          <span class="domain">antioquia-procuraduria.ventanilla-unica.store</span>
+          <span class="meta">Su equipo · su IA · sus casos · su director</span>
+        </div>
+        <div class="wall">sin cruce</div>
+        <div class="regional">
+          <h3>Procuraduría Regional del Valle del Cauca</h3>
+          <span class="domain">valle-procuraduria.ventanilla-unica.store</span>
+          <span class="meta">Su equipo · su IA · sus casos · su director</span>
+        </div>
+        <div class="wall">sin cruce</div>
+        <div class="regional">
+          <h3>Procuraduría Regional del Atlántico</h3>
+          <span class="domain">atlantico-procuraduria.ventanilla-unica.store</span>
+          <span class="meta">Su equipo · su IA · sus casos · su director</span>
+        </div>
+      </div>
+    </div>
+    <p class="illus">Esquema ilustrativo. Los dominios y las regionales mostradas son ejemplos de configuración.</p>
+    <ul class="points">
+      <li><b>Portal propio por sede</b><span>Cada regional tiene su subdominio, con su nombre, logo y colores. Lo que no defina, lo hereda de la entidad.</span></li>
+      <li><b>Ningún caso huérfano</b><span>El caso queda amarrado a la sede por la que se radicó.</span></li>
+      <li><b>Aislamiento estricto</b><span>Bandejas, tableros, equipo, cargos y atención presencial. El funcionario de Medellín no ve ni toca lo de Barranquilla. Se impone en el servidor.</span></li>
+      <li><b>La IA nunca cruza sedes</b><span>Cada sede tiene su propia cuadrilla y sus llaves de IA, con herencia hacia la entidad si se agotan.</span></li>
+      <li><b>El nivel central ve todo</b><span>Estadísticas por sede, fila consolidada y anotaciones al responsable de cada regional.</span></li>
+      <li><b>Sede nueva en minutos</b><span>Se compone el dominio, se crea su administrador y sale la pantalla con URL, usuario y contraseña.</span></li>
+    </ul>
+  </section>
+
+  <!-- Acceso -->
+  <section class="panel" aria-labelledby="t-doors">
+    <div class="panel-head">
+      <span class="eyebrow">Control de acceso</span>
+      <h2 id="t-doors">Cada quien entra por su puerta, incluida la principal</h2>
+      <p>El servidor compara la sede del dominio con la sede del usuario y rechaza el cruce. Ni el portal principal deja entrar a un funcionario de una regional, ni al revés.</p>
+    </div>
+    <div class="doors">
+      <div class="door">
+        <p class="user"><b>Funcionaria de la Regional de Antioquia</b> · rol y sede asignados</p>
+        <div class="door-row"><span class="domain">antioquia-procuraduria.ventanilla-unica.store</span><span class="status ok">200 · entra</span></div>
+      </div>
+      <div class="door">
+        <p class="user"><b>La misma funcionaria</b> · intenta el portal central</p>
+        <div class="door-row"><span class="domain">procuraduria.ventanilla-unica.store</span><span class="status no">403 · portal incorrecto</span></div>
+      </div>
+    </div>
+    <p class="callout">La principal no es un superior que ve todo. Es una sede más, con un panel encima. De las regionales solo recibe cifras: cuántos casos, cuántos por vencer, cuántos cerrados. Los expedientes de Antioquia se quedan en Antioquia.</p>
+  </section>
+
+  <!-- Cierre -->
+  <section class="panel closing" aria-labelledby="t-close">
+    <div class="panel-head">
+      <span class="eyebrow">Qué recibe la Procuraduría</span>
+      <h2 id="t-close">Un entorno propio, listo para el nivel central y sus regionales</h2>
+    </div>
+    <div class="deliver">
+      <div><b>Base de datos independiente</b><span>Una entidad, un entorno. Su información no se mezcla con la de nadie.</span></div>
+      <div><b>Dominio propio</b><span>Portal principal y un subdominio por cada regional que se active.</span></div>
+      <div><b>IA en cada paso</b><span>Clasifica, asigna y sugiere respuestas. El funcionario siempre revisa antes de enviar.</span></div>
+      <div><b>Plazos sin errores</b><span>Días hábiles, festivos y Ley Emiliani calculados por el sistema, con semáforo.</span></div>
+    </div>
+    <div class="cta">
+      <div class="cta-by"><p>Agendemos una demostración con su propio entorno.</p><small>Una propuesta presentada por Global BPO S.A.S.</small></div>
+      <span class="mono">ventanilla-unica.store</span>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  var cal=document.getElementById('cal'); if(!cal) return;
+  var dows=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  dows.forEach(function(d){var e=document.createElement('div');e.className='dow';e.textContent=d;cal.appendChild(e);});
+  var year=2026, month=10, radica=3, festivos={2:1,16:1}, plazo=15;
+  var first=new Date(year,month,1), lead=(first.getDay()+6)%7, days=new Date(year,month+1,0).getDate();
+  for(var i=0;i<lead;i++){var e=document.createElement('div');e.className='day empty';cal.appendChild(e);}
+  var count=0;
+  for(var d=1;d<=days;d++){
+    var el=document.createElement('div'), wd=(new Date(year,month,d).getDay()+6)%7, cls=['day'];
+    el.innerHTML='<span>'+d+'</span>';
+    if(wd>4) cls.push('weekend');
+    else if(festivos[d]) cls.push('fest');
+    else if(d>radica && count<plazo){
+      count++;
+      cls.push(count<=8?'c-ok':count<=12?'c-warn':'c-bad');
+      if(count===plazo) cls.push('due');
+      var n=document.createElement('span');n.className='n';n.textContent=count;el.appendChild(n);
+    }
+    if(d===radica) cls.push('rad');
+    el.className=cls.join(' ');
+    cal.appendChild(el);
+  }
+})();
+</script>

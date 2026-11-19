@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Panorama · Procuraduría</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--ink:#13241C;--muted:#56665E;--line:#D6DFD9;--green:#0D5C3D;--soft:#E4F0E9;--gold:#A97A1F;--goldsoft:#F6EEDD;--paper:#FFFFFF;
+  --f-display:"Source Serif 4",Georgia,serif;--f-body:"Public Sans","Segoe UI",sans-serif;--f-mono:"IBM Plex Mono",Menlo,monospace}
+@page{size:A4;margin:16mm 15mm 16mm}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;font-family:var(--f-body);color:var(--ink);background:var(--paper);font-size:9.4pt;line-height:1.5}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;margin:0;line-height:1.2}
+h1{font-size:22pt}
+h2{font-size:13.5pt;display:flex;align-items:baseline;gap:10px}
+h2 .n{font-family:var(--f-mono);font-size:9pt;font-weight:500;color:var(--green);background:var(--soft);padding:2px 7px;border-radius:3px}
+h3{font-size:10.5pt}
+p{margin:0}
+ul{margin:0;padding-left:16px;display:flex;flex-direction:column;gap:4px}
+.eyebrow{font-size:7.5pt;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--green)}
+.muted{color:var(--muted)}
+.head{border-top:5px solid var(--green);padding-top:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.brand{font-family:var(--f-display);font-weight:700;font-size:12pt}
+.brand small{display:block;font-family:var(--f-body);font-weight:500;font-size:7.5pt;color:var(--muted)}
+.by{text-align:right;border-left:1px solid var(--line);padding-left:14px}
+.by span{display:block;font-size:7pt;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.by b{font-family:var(--f-display);font-size:11pt;font-weight:600}
+.title{margin:20px 0 4px;display:flex;flex-direction:column;gap:8px}
+.lead{font-size:10.4pt;color:var(--muted);max-width:66ch}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.stat{border-top:2px solid var(--green);padding-top:8px}
+.stat b{font-family:var(--f-display);font-size:17pt;font-weight:700;color:var(--green);display:block;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:8pt;color:var(--muted)}
+section.prob{margin-top:18px;break-inside:avoid;display:flex;flex-direction:column;gap:8px}
+.cols{display:grid;grid-template-columns:1.35fr 1fr;gap:14px}
+.facts{font-size:9pt}
+.facts .lbl,.answer .lbl{font-size:7pt;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;display:block}
+.answer{background:var(--soft);border-radius:4px;padding:10px 12px;font-size:9pt;display:flex;flex-direction:column;gap:6px}
+.answer .lbl{color:var(--green)}
+.reading{font-size:8.8pt;border-left:3px solid var(--gold);padding:2px 0 2px 10px;color:var(--ink)}
+.reading i{color:var(--muted);font-style:normal;font-weight:600}
+.ref{font-family:var(--f-mono);font-size:7pt;color:var(--muted)}
+.page-break{break-before:page}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:7pt;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:1.5px solid var(--ink)}
+td:first-child{width:50%}
+.bpo{background:var(--green);color:#fff;border-radius:4px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;margin-top:16px;break-inside:avoid}
+.bpo .eyebrow{color:#fff;opacity:.8}
+.bpo p{opacity:.93}
+.caveat{background:var(--goldsoft);border-radius:4px;padding:10px 12px;font-size:8.6pt;margin-top:14px;break-inside:avoid}
+.caveat b{color:var(--gold)}
+ol.src{margin:6px 0 0;padding-left:18px;font-size:7.8pt;color:var(--muted);columns:1}
+ol.src li{margin-bottom:3px}
+.url{font-family:var(--f-mono);font-size:6.8pt;word-break:break-all}
+footer{margin-top:16px;padding-top:8px;border-top:1px solid var(--line);font-size:7.5pt;color:var(--muted);display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="brand">Ventanilla Única<small>Gestión de PQRSD para entidades públicas</small></div>
+  <div class="by"><span>Presenta</span><b>Global BPO S.A.S.</b></div>
+</div>
+
+<div class="title">
+  <span class="eyebrow">Panorama · Procuraduría General de la Nación</span>
+  <h1>Por qué implementar Ventanilla Única en la Procuraduría</h1>
+  <p class="lead">Los documentos públicos de la entidad muestran un volumen alto de solicitudes, una entrada dominada por el correo electrónico, un cambio de plataforma reciente, errores de clasificación y un riesgo reconocido de vencer los términos legales. Este panorama resume cada dificultad y cómo la atiende Ventanilla Única.</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><b>317.728</b><span>radicados en el segundo semestre de 2024</span></div>
+  <div class="stat"><b>52 %</b><span>de los radicados del segundo semestre de 2022 entraron por correo</span></div>
+  <div class="stat"><b>50.488</b><span>quejas disciplinarias entre julio de 2024 y junio de 2025</span></div>
+  <div class="stat"><b>7+</b><span>modificaciones a la Resolución 414 de 2023 de reparto territorial</span></div>
+</div>
+
+<section class="prob">
+  <h2><span class="n">1</span>Volumen muy alto que entra por muchos canales</h2>
+  <div class="cols">
+    <div class="facts">
+      <span class="lbl">Lo que dicen las fuentes</span>
+      <ul>
+        <li>Más de 300.000 radicados por semestre: 366.185 en el segundo semestre de 2020, 378.738 en el de 2022 y 317.728 en el de 2024, ya entre SIGDEA y Dokus.</li>
+        <li>En el segundo semestre de 2022 entraron 197.150 radicados por correo, 119.093 por ventanilla y 40.601 por mensajería.</li>
+        <li>Cuatro canales: correo, ventanilla, PBX y sede electrónica. Desde 2021 la entidad contrata un centro de contacto BPO para recibir, clasificar y digitalizar.</li>
+      </ul>
+    </div>
+    <div class="answer">
+      <span class="lbl">Ventanilla Única</span>
+      <p>Formulario estructurado con radicado inmediato en pantalla y en el correo. La IA lee el escrito y los adjuntos, lo clasifica y lo asigna en segundos.</p>
+    </div>
+  </div>
+  <p class="reading"><i>Lectura.</i> Un correo llega como texto libre. Alguien tiene que leerlo, decidir qué tipo de solicitud es y a quién va. Con este volumen, esa clasificación manual es un cuello de botella y una fuente de errores.</p>
+</section>
+
+<section class="prob">
+  <h2><span class="n">2</span>Cambio de plataforma todavía en estabilización</h2>
+  <div class="cols">
+    <div class="facts">
+      <span class="lbl">Lo que dicen las fuentes</span>
+      <ul>
+        <li>La Resolución 293 de 2024 cambió SIGDEA por Dokus, que entró en producción el 2 de septiembre de 2024. SIGDEA quedó solo para cerrar trámites abiertos, con depuración hasta el 13 de diciembre de 2024.</li>
+        <li>Un memorando pidió a los jefes de dependencia verificar que todo su personal se capacitara en Dokus, y habló de un periodo de estabilización.</li>
+        <li>En 2026 siguen saliendo memorandos sobre el correcto registro y la tipificación de PQRSDF en Dokus y sobre la aplicación de términos.</li>
+      </ul>
+    </div>
+    <div class="answer">
+      <span class="lbl">Ventanilla Única</span>
+      <p>No reemplaza a Dokus. Funciona como la capa de atención al ciudadano, con clasificación y asignación automáticas, y alimenta el expediente.</p>
+    </div>
+  </div>
+  <p class="reading"><i>Lectura.</i> Dokus es un gestor documental de archivo. No está pensado para la experiencia del ciudadano ni para repartir casos entre funcionarios.</p>
+</section>
+
+<section class="prob">
+  <h2><span class="n">3</span>Riesgo de vencer los términos legales</h2>
+  <div class="cols">
+    <div class="facts">
+      <span class="lbl">Lo que dicen las fuentes</span>
+      <ul>
+        <li>El plan anticorrupción de la Procuraduría incluye como riesgo el incumplimiento de términos para resolver derechos de petición.</li>
+        <li>Control Interno, en el segundo semestre de 2024, pide reportar las PQRSD trasladadas a otras entidades y las negativas de acceso a la información, y depurar la clasificación de canales y tipos de comunicación.</li>
+        <li>La guía de Dokus de 2025 parametriza los términos para evitar vencimientos. Aun así, los memorandos de 2026 siguen corrigiendo su aplicación.</li>
+      </ul>
+    </div>
+    <div class="answer">
+      <span class="lbl">Ventanilla Única</span>
+      <p>Calcula el vencimiento por tipo de solicitud, en días hábiles, con los festivos de Colombia y la Ley Emiliani. Semáforo por caso y panel central con los casos por vencer de cada sede.</p>
+    </div>
+  </div>
+</section>
+
+<section class="prob">
+  <h2><span class="n">4</span>Una estructura territorial compleja y cambiante</h2>
+  <div class="cols">
+    <div class="facts">
+      <span class="lbl">Lo que dicen las fuentes</span>
+      <ul>
+        <li>Desde el Decreto 1851 de 2021, cada regional y provincial se divide en una oficina de instrucción y otra de juzgamiento: 32 regionales y de 51 a 55 provinciales de cada tipo.</li>
+        <li>La Resolución 414 de 2023, que reparte las competencias territoriales, se ha modificado al menos siete veces entre 2023 y 2025. En 2025 se creó la provincial de San Juan del Cesar.</li>
+      </ul>
+    </div>
+    <div class="answer">
+      <span class="lbl">Ventanilla Única</span>
+      <p>Una sede por regional, con aislamiento estricto. Alta de una sede nueva en minutos. Remisión a la sede o entidad competente dentro del mismo sistema.</p>
+    </div>
+  </div>
+  <p class="reading"><i>Lectura.</i> Un caso que llega a la oficina equivocada pierde días del plazo mientras se traslada.</p>
+</section>
+
+<section class="prob">
+  <h2><span class="n">5</span>Congestión en la función disciplinaria</h2>
+  <div class="cols">
+    <div class="facts">
+      <span class="lbl">Lo que dicen las fuentes</span>
+      <ul>
+        <li>El informe de gestión al Congreso reporta 50.488 quejas disciplinarias entre julio de 2024 y junio de 2025.</li>
+        <li>El portal El Expediente reporta, en la etapa de juzgamiento, 934 archivos por prescripción frente a 600 fallos sancionatorios. La Procuraduría informa que la prescripción fue el 2,72 % de las decisiones, medida en otra etapa, así que las cifras no son comparables.</li>
+        <li>Expertos citados por El Tiempo proponen alertas tempranas para expedientes en riesgo de prescripción.</li>
+      </ul>
+    </div>
+    <div class="answer">
+      <span class="lbl">Ventanilla Única</span>
+      <p>Asigna la queja al funcionario de la materia en segundos, según su disponibilidad y carga. Marca ausencias para que nadie reciba casos estando de vacaciones o incapacitado.</p>
+    </div>
+  </div>
+  <p class="reading"><i>Lectura.</i> Las quejas entran por los mismos canales que las PQRSD. Cada día de clasificación y asignación se descuenta del plazo de prescripción.</p>
+</section>
+
+<section class="page-break">
+  <h2>Resumen: dificultad y respuesta</h2>
+  <table style="margin-top:8px">
+    <thead><tr><th>Dificultad documentada</th><th>Respuesta de Ventanilla Única</th></tr></thead>
+    <tbody>
+      <tr><td>Más de 300.000 radicados por semestre, la mayoría por correo</td><td>Formulario estructurado, radicado inmediato, IA que clasifica</td></tr>
+      <tr><td>Errores de tipificación en Dokus (memorandos de 2026)</td><td>La IA lee el escrito y los adjuntos y propone tipo y materia</td></tr>
+      <tr><td>Términos difíciles de controlar</td><td>Reloj legal automático con semáforo</td></tr>
+      <tr><td>Instrucción y juzgamiento, reparto territorial cambiante</td><td>Una sede por regional, aislamiento, alta en minutos</td></tr>
+      <tr><td>Supervisión central limitada</td><td>Panel de solo lectura con cifras por sede en vivo</td></tr>
+      <tr><td>Funcionarios ausentes que siguen recibiendo casos</td><td>Ausencias marcadas y reparto según la carga</td></tr>
+    </tbody>
+  </table>
+
+  <div class="bpo">
+    <span class="eyebrow">Propuesta de Global BPO S.A.S.</span>
+    <h3 style="font-size:13pt">Operación y tecnología en una sola propuesta</h3>
+    <p>La Procuraduría ya contrata un centro de contacto BPO para recibir, clasificar y digitalizar sus PQRSD. Global BPO propone sumar Ventanilla Única a esa operación: la clasificación que hoy hacen personas la hace la IA, el funcionario revisa, y el nivel central mide los resultados de cada sede en el panel.</p>
+  </div>
+
+  <div class="caveat"><b>Nota sobre los datos.</b> No se encontró una cifra pública del porcentaje de PQRSD respondidas fuera de término por la Procuraduría. Ese dato está en los informes semestrales de su Oficina de Control Interno y conviene incorporarlo antes de la presentación. La cifra de prescripción de El Expediente es periodística, no oficial.</div>
+
+  <h2 style="margin-top:18px">Fuentes</h2>
+  <ol class="src">
+    <li>Control Interno PGN, seguimiento PQRSDF, segundo semestre de 2024. <span class="url">procuraduria.gov.co/Documents/2025/Febrero/Informe Seguimiento PQRSDF Segundo Semestre 2024.pdf</span></li>
+    <li>Control Interno PGN, seguimiento PQRSD, segundo semestre de 2020. <span class="url">procuraduria.gov.co/portal/media/docs/Informe Seguimiento PQRSD 2020 Segundo Semestre 2020.pdf</span></li>
+    <li>Control Interno PGN, seguimiento PQR, junio de 2023. <span class="url">procuraduria.gov.co/Documents/Junio 2023/PQR.pdf</span></li>
+    <li>PGN, estudio previo del centro de contacto BPO. <span class="url">apps.procuraduria.gov.co/portal/media/file/contratacion/2645/ESTUDIO_PREVIO_BPO.pdf</span></li>
+    <li>Colombia Compra Eficiente, orden de compra 73244 de 2021. <span class="url">operaciones.colombiacompra.gov.co/sites/cce_public/files/cce_update_purchase_order/oc_73244_2021_paquete_modificacion.pdf</span></li>
+    <li>PGN, guía de gestión y parametrización del sistema PQRSD, 2025. <span class="url">procuraduria.gov.co/Documents/2025/Noviembre 2025/3231_AC-G-01 GUIA GESTION Y PARAMETRIZACION EN EL SISTEMA PQDRS PGN (1).pdf</span></li>
+    <li>Resolución 293 de 2024, adopción de Dokus, y memorandos PGN 014 y 019 de 2024 y 005A de 2026. <span class="url">normograma.com/documentospdf/pgn/v3_iconos/compilacion/docs/</span></li>
+    <li>PGN, plan anticorrupción y de atención al ciudadano. <span class="url">procuraduria.gov.co/portal/media/docs/190408-PLAN-ANTICORRUPCION-PGN.pdf</span></li>
+    <li>PGN, informe de gestión al Congreso, 2024-II a 2025-I. <span class="url">procuraduria.gov.co/Documents/2025/Septiembre/Informe de Gestión al Congreso (2024 II-2025 I).pdf</span></li>
+    <li>El Expediente, "El Procurador, en el ojo del huracán". <span class="url">elexpediente.co/el-procurador-en-el-ojo-del-huracan/</span></li>
+    <li>El Tiempo, riesgo de prescripción de procesos disciplinarios. <span class="url">eltiempo.com/justicia/investigacion/margarita-cabello-responde-ante-riesgo-de-prescripcion-de-procesos-en-procuraduria-841443</span></li>
+    <li>Resolución 414 de 2023 y Decreto 1851 de 2021. <span class="url">apps.procuraduria.gov.co/relatoria · funcionpublica.gov.co/eva/gestornormativo/norma.php?i=175150</span></li>
+  </ol>
+</section>
+
+<footer><span>Ventanilla Única · Global BPO S.A.S.</span><span>Noviembre de 2026</span></footer>
+
+</body>
+</html>
