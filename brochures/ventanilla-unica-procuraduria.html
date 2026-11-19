@@ -45,6 +45,11 @@ p{margin:0}
 .brand-mark{width:40px;height:40px;border-radius:4px;background:var(--green);display:grid;place-items:center}
 .brand-mark svg{width:24px;height:24px}
 .brand-name{font-family:var(--f-display);font-weight:700;font-size:1.25rem;line-height:1.1}
+.presenter{margin-left:auto;padding-left:16px;border-left:1px solid var(--line);display:flex;flex-direction:column;line-height:1.2}
+.presenter span{font-size:.68rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.presenter b{font-family:var(--f-display);font-weight:600;font-size:1.05rem}
+.cta-by{display:flex;flex-direction:column;gap:4px}
+.cta-by small{font-size:.85rem;opacity:.85}
 .brand-name small{display:block;font-family:var(--f-body);font-weight:500;font-size:.74rem;color:var(--muted);letter-spacing:.04em}
 .cover-copy{display:flex;flex-direction:column;gap:18px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
@@ -184,6 +189,7 @@ p{margin:0}
           <svg viewBox="0 0 24 24" fill="none" stroke="var(--green-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
         </div>
         <div class="brand-name">Ventanilla Única<small>Gestión de PQRSD para entidades públicas</small></div>
+        <div class="presenter"><span>Presenta</span><b>Global BPO S.A.S.</b></div>
       </div>
       <span class="eyebrow">Propuesta para la Procuraduría General de la Nación</span>
       <h1 id="t-cover">Cada PQRSD con su responsable asignado y su plazo legal a la vista.</h1>
@@ -379,7 +385,7 @@ p{margin:0}
       <div><b>Plazos sin errores</b><span>Días hábiles, festivos y Ley Emiliani calculados por el sistema, con semáforo.</span></div>
     </div>
     <div class="cta">
-      <p>Agendemos una demostración con su propio entorno.</p>
+      <div class="cta-by"><p>Agendemos una demostración con su propio entorno.</p><small>Una propuesta presentada por Global BPO S.A.S.</small></div>
       <span class="mono">ventanilla-unica.store</span>
     </div>
   </section>
